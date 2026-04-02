@@ -1,0 +1,11 @@
+{"plugins": [],
+ "package": "VerifiableAuthSpec",
+ "options": {},
+ "name": "VerifiableAuth.WellFormed",
+ "isModule": false,
+ "importArts":
+ {"VerifiableAuth.Types":
+  ["C:\\Users\\kinbo\\verifiable-auth-platform\\spec\\.lake\\build\\lib\\lean\\VerifiableAuth\\Types.olean"],
+  "VerifiableAuth.StateModel":
+  ["C:\\Users\\kinbo\\verifiable-auth-platform\\spec\\.lake\\build\\lib\\lean\\VerifiableAuth\\StateModel.olean"]},
+ "dynlibs": []}

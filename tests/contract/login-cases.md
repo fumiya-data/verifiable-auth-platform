@@ -1,0 +1,10 @@
+# Login Contract Cases
+
+| Case | Document source | Lean source | Engine coverage |
+| --- | --- | --- | --- |
+| `unknown_user` keeps state unchanged | `docs/system-specification.md` §5.2 branch 1 | `VerifiableAuth.LoginSpec.login`, `login_unknown_user_keeps_state` | `engine/tests/unit/test_login.c`, `engine/tests/integration/test_cli_golden_json.c` |
+| `locked_out` for a previously locked user keeps state unchanged | `docs/system-specification.md` §5.2 branch 2 | `VerifiableAuth.LoginSpec.login` | `engine/tests/unit/test_login.c`, `engine/tests/integration/test_cli_golden_json.c` |
+| `wrong_password` increments failures without changing the session | `docs/system-specification.md` §5.2 branch 3 | `VerifiableAuth.LoginSpec.login` | `engine/tests/unit/test_login.c`, `engine/tests/integration/test_cli_golden_json.c` |
+| `locked_out` on the threshold-crossing failure both persists state and records a `Lock` event | `docs/system-specification.md` §5.2 branch 3 | `VerifiableAuth.LoginSpec.login`, `RefinementNotes.loginAuditEventType`, `RefinementNotes.loginPersistsState` | `engine/tests/unit/test_login.c`, `engine/tests/integration/test_cli_golden_json.c`, `engine/tests/integration/test_cli_show_metrics.c` |
+| `success` clears failures and authenticates the login ID | `docs/system-specification.md` §5.2 branch 4 | `VerifiableAuth.LoginSpec.login`, `login_success_sets_authenticated` | `engine/tests/unit/test_login.c`, `engine/tests/integration/test_cli_login.c`, `engine/tests/integration/test_cli_golden_json.c` |
+| `already_authenticated` leaves state unchanged and does not count as a login failure metric | `docs/system-specification.md` §5.2 properties and §7.5 observability mapping | `VerifiableAuth.LoginSpec.login_already_authenticated_is_noop`, `RefinementNotes.alreadyAuthenticated_does_not_count_as_login_failure` | `engine/tests/unit/test_login.c`, `engine/tests/integration/test_cli_show_metrics.c`, `engine/tests/integration/test_cli_golden_json.c`, `engine/tests/integration/test_file_audit_log.c` |

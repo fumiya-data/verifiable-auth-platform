@@ -1,0 +1,9 @@
+{"plugins": [],
+ "package": "VerifiableAuthSpec",
+ "options": {},
+ "name": "VerifiableAuth.StateModel",
+ "isModule": false,
+ "importArts":
+ {"VerifiableAuth.Types":
+  ["C:\\Users\\kinbo\\verifiable-auth-platform\\spec\\.lake\\build\\lib\\lean\\VerifiableAuth\\Types.olean"]},
+ "dynlibs": []}

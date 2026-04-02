@@ -12,7 +12,8 @@
 /**
  * @brief Mutable SHA-256 state used by the streaming update/finalize API.
  */
-typedef struct auth_sha256_ctx {
+typedef struct auth_sha256_ctx
+{
     /** Current chaining value for the eight SHA-256 working words. */
     uint32_t state[8];
     /** Total message length in bytes, used when appending the final bit length. */
