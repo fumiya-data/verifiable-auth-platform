@@ -1,0 +1,24 @@
+name: spec
+
+on:
+  push:
+    paths:
+      - "spec/**"
+      - "docs/**"
+      - "scripts/run-spec-check.sh"
+      - ".github/workflows/spec.yml"
+  pull_request:
+    paths:
+      - "spec/**"
+      - "docs/**"
+      - "scripts/run-spec-check.sh"
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          use-mathlib-cache: false
+          build-package: spec

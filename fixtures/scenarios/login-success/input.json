@@ -1,0 +1,15 @@
+{
+  "scenario": "login-success",
+  "commands": [
+    {
+      "command": "register",
+      "login_id": "alice",
+      "password": "hunter2"
+    },
+    {
+      "command": "login",
+      "login_id": "alice",
+      "password": "hunter2"
+    }
+  ]
+}

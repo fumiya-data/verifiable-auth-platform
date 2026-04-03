@@ -1,0 +1,23 @@
+# Audit Report
+
+- Total events: {{ audit.event_count }}
+- First timestamp: {{ audit.first_timestamp or "n/a" }}
+- Last timestamp: {{ audit.last_timestamp or "n/a" }}
+
+## Events By Type
+
+{% for key, value in audit.by_event_type.items() -%}
+- {{ key }}: {{ value }}
+{% endfor %}
+
+## Results
+
+{% for key, value in audit.by_result.items() -%}
+- {{ key }}: {{ value }}
+{% endfor %}
+
+## Login IDs
+
+{% for key, value in audit.by_login_id.items() -%}
+- {{ key }}: {{ value }}
+{% endfor %}

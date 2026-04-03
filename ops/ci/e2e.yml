@@ -1,0 +1,32 @@
+name: e2e
+
+on:
+  push:
+    paths:
+      - "analysis/**"
+      - "observability/**"
+      - "scripts/**"
+      - "tests/e2e/**"
+      - ".github/workflows/e2e.yml"
+  pull_request:
+    paths:
+      - "analysis/**"
+      - "observability/**"
+      - "scripts/**"
+      - "tests/e2e/**"
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tui/go.mod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install analysis dependencies
+        run: python -m pip install -r analysis/requirements.txt
+      - name: Run verification flow
+        run: bash scripts/run-e2e.sh

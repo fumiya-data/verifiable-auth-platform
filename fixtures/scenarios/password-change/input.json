@@ -1,0 +1,20 @@
+{
+  "scenario": "password-change",
+  "commands": [
+    {
+      "command": "register",
+      "login_id": "alice",
+      "password": "hunter2"
+    },
+    {
+      "command": "login",
+      "login_id": "alice",
+      "password": "hunter2"
+    },
+    {
+      "command": "change-password",
+      "old_password": "hunter2",
+      "new_password": "new-secret"
+    }
+  ]
+}

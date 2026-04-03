@@ -43,12 +43,9 @@ The three layers are currently aligned on the following core behaviors:
 ## Verification Performed
 
 - `lake build` succeeded in `spec/`
-- GCC engine tests succeeded with:
-  - `-std=c23`
-  - `-Wall`
-  - `-Wextra`
-  - `-Wpedantic`
-  - `-Werror`
+- The repository now defines a canonical engine verification path through
+  [`../scripts/run-engine-tests.sh`](../scripts/run-engine-tests.sh), which
+  configures a fresh CMake build, compiles the C engine, and runs CTest.
 - Contract and golden mappings are recorded under [`tests/contract`](../tests/contract) and [`tests/golden`](../tests/golden)
 
 ## Intentional Modeling Differences
@@ -71,3 +68,6 @@ When a future change touches any of the following, update all three layers toget
 - audit event mapping
 - metrics counting rules
 - CLI JSON field names or command names
+
+The same change should also update the observability and analysis contracts
+under [`../observability`](../observability) and [`../analysis`](../analysis).

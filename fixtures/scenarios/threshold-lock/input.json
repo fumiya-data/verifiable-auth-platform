@@ -1,0 +1,25 @@
+{
+  "scenario": "threshold-lock",
+  "commands": [
+    {
+      "command": "register",
+      "login_id": "alice",
+      "password": "hunter2"
+    },
+    {
+      "command": "login",
+      "login_id": "alice",
+      "password": "wrong-1"
+    },
+    {
+      "command": "login",
+      "login_id": "alice",
+      "password": "wrong-2"
+    },
+    {
+      "command": "login",
+      "login_id": "alice",
+      "password": "wrong-3"
+    }
+  ]
+}

@@ -1,2 +1,10 @@
 .stcratch/
-engine/.scratch
+engine/.scratch/
+tui/.scratch/
+engine/.build/
+engine/build/
+spec/.lake/
+analysis/output/*
+!analysis/output/.gitkeep
+__pycache__/
+*.pyc

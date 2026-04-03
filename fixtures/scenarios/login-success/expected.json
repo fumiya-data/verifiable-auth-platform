@@ -1,0 +1,21 @@
+{
+  "result": "success",
+  "authenticated_login_id": "alice",
+  "audit": [
+    {
+      "event_type": "Register",
+      "login_id": "alice",
+      "result": "success"
+    },
+    {
+      "event_type": "LoginSuccess",
+      "login_id": "alice",
+      "result": "success"
+    }
+  ],
+  "metrics": {
+    "login_success_count": 1,
+    "login_failure_count": 0,
+    "lockout_count": 0
+  }
+}

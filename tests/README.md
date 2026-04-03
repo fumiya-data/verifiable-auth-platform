@@ -12,8 +12,8 @@ the platform.
   - Stable sample outputs that should not change without an intentional
     contract update.
 - `e2e/`
-  - End-to-end scenarios that describe cross-layer behavior for future TUI and
-    system-level testing.
+  - End-to-end runbooks that define cross-layer TUI and system verification
+    flows.
 
 ## Source of Truth
 

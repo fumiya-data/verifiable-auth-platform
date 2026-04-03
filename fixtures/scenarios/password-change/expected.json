@@ -1,0 +1,14 @@
+{
+  "result": "success",
+  "session_preserved": true,
+  "audit_terminal_event": {
+    "event_type": "PasswordChange",
+    "login_id": "alice",
+    "result": "success"
+  },
+  "metrics": {
+    "login_success_count": 1,
+    "login_failure_count": 0,
+    "lockout_count": 0
+  }
+}

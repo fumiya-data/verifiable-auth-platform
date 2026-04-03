@@ -1,0 +1,33 @@
+{
+  "ok": true,
+  "result": "success",
+  "data": {
+    "events": [
+      {
+        "timestamp": "2026-01-01T00:00:00Z",
+        "event_type": "Register",
+        "login_id": "alice",
+        "result": "success"
+      },
+      {
+        "timestamp": "2026-01-01T00:01:00Z",
+        "event_type": "LoginSuccess",
+        "login_id": "alice",
+        "result": "success"
+      },
+      {
+        "timestamp": "2026-01-01T00:02:00Z",
+        "event_type": "LoginFailure",
+        "login_id": "alice",
+        "result": "wrong_password"
+      },
+      {
+        "timestamp": "2026-01-01T00:03:00Z",
+        "event_type": "Lock",
+        "login_id": "alice",
+        "result": "locked_out"
+      }
+    ]
+  },
+  "error": null
+}

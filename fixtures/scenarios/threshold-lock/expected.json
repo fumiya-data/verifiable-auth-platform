@@ -1,0 +1,13 @@
+{
+  "result": "locked_out",
+  "audit_terminal_event": {
+    "event_type": "Lock",
+    "login_id": "alice",
+    "result": "locked_out"
+  },
+  "metrics": {
+    "login_success_count": 0,
+    "login_failure_count": 3,
+    "lockout_count": 1
+  }
+}

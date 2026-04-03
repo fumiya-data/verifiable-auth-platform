@@ -1,0 +1,11 @@
+{
+  "users": [
+    {
+      "login_id": "alice",
+      "salt": "ffeeddccbbaa99887766554433221100",
+      "password_hash": "ae4d0c95af6b46d32d0adff928f06dd02a303f8ef3c251dfd6e2d85a95474c43",
+      "failed_attempts": 3,
+      "lock_state": "locked"
+    }
+  ]
+}

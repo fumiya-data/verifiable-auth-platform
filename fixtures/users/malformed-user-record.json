@@ -1,0 +1,11 @@
+{
+  "users": [
+    {
+      "login_id": "alice",
+      "salt": "not-a-valid-salt",
+      "password_hash": "short",
+      "failed_attempts": 2,
+      "lock_state": "active"
+    }
+  ]
+}

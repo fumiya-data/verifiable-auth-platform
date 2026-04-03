@@ -1,0 +1,15 @@
+{
+  "result": "success",
+  "audit": [
+    {
+      "event_type": "Register",
+      "login_id": "alice",
+      "result": "success"
+    }
+  ],
+  "metrics": {
+    "login_success_count": 0,
+    "login_failure_count": 0,
+    "lockout_count": 0
+  }
+}
