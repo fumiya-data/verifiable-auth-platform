@@ -34,9 +34,11 @@ theorem User.active_of_not_locked
     {user : User}
     (hNotLocked : user.lockState ≠ .locked) :
     user.lockState = .active := by
-  cases user.lockState with
+  cases hState : user.lockState with
   | active => rfl
-  | locked => contradiction
+  | locked =>
+      exfalso
+      exact hNotLocked hState
 
 theorem mkRegisteredUser_wellFormed (loginId : LoginId) (password : Password) :
     (mkRegisteredUser loginId password).WellFormed := by

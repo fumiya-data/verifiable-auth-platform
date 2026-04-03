@@ -13,12 +13,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+lean_object* lp_VerifiableAuthSpec_VerifiableAuth_derivePasswordHash(lean_object*, lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t lp_VerifiableAuthSpec_VerifiableAuth_instDecidablePasswordMatches(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* lp_VerifiableAuthSpec_VerifiableAuth_instDecidablePasswordMatches___boxed(lean_object*, lean_object*);
 lean_object* lean_nat_add(lean_object*, lean_object*);
 uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* lp_VerifiableAuthSpec_VerifiableAuth_User_noteFailedLogin(lean_object*);
 LEAN_EXPORT lean_object* lp_VerifiableAuthSpec_VerifiableAuth_User_clearFailedAttempts(lean_object*);
 lean_object* lp_VerifiableAuthSpec_VerifiableAuth_Salt_rotate(lean_object*);
-lean_object* lp_VerifiableAuthSpec_VerifiableAuth_derivePasswordHash(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* lp_VerifiableAuthSpec_VerifiableAuth_User_changePassword(lean_object*, lean_object*);
 lean_object* lp_VerifiableAuthSpec_VerifiableAuth_Salt_initial(lean_object*);
 LEAN_EXPORT lean_object* lp_VerifiableAuthSpec_VerifiableAuth_mkRegisteredUser(lean_object*, lean_object*);
@@ -35,6 +38,33 @@ LEAN_EXPORT lean_object* lp_VerifiableAuthSpec_VerifiableAuth_AuthState_insertUs
 LEAN_EXPORT lean_object* lp_VerifiableAuthSpec_VerifiableAuth_AuthState_replaceUser(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* lp_VerifiableAuthSpec_VerifiableAuth_AuthState_clearSession(lean_object*);
 LEAN_EXPORT lean_object* lp_VerifiableAuthSpec_VerifiableAuth_AuthState_setAuthenticated(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* lp_VerifiableAuthSpec___private_VerifiableAuth_StateModel_0__VerifiableAuth_lookupUserInList_match__1_splitter___redArg(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* lp_VerifiableAuthSpec___private_VerifiableAuth_StateModel_0__VerifiableAuth_lookupUserInList_match__1_splitter(lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t lp_VerifiableAuthSpec_VerifiableAuth_instDecidablePasswordMatches(lean_object* x_1, lean_object* x_2) {
+_start:
+{
+lean_object* x_3; lean_object* x_4; lean_object* x_5; uint8_t x_6; 
+x_3 = lean_ctor_get(x_1, 1);
+lean_inc_ref(x_3);
+x_4 = lean_ctor_get(x_1, 2);
+lean_inc(x_4);
+lean_dec_ref(x_1);
+x_5 = lp_VerifiableAuthSpec_VerifiableAuth_derivePasswordHash(x_2, x_3);
+x_6 = lean_nat_dec_eq(x_5, x_4);
+lean_dec(x_4);
+lean_dec(x_5);
+return x_6;
+}
+}
+LEAN_EXPORT lean_object* lp_VerifiableAuthSpec_VerifiableAuth_instDecidablePasswordMatches___boxed(lean_object* x_1, lean_object* x_2) {
+_start:
+{
+uint8_t x_3; lean_object* x_4; 
+x_3 = lp_VerifiableAuthSpec_VerifiableAuth_instDecidablePasswordMatches(x_1, x_2);
+x_4 = lean_box(x_3);
+return x_4;
+}
+}
 LEAN_EXPORT lean_object* lp_VerifiableAuthSpec_VerifiableAuth_User_noteFailedLogin(lean_object* x_1) {
 _start:
 {
@@ -492,6 +522,56 @@ x_8 = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(x_8, 0, x_6);
 lean_ctor_set(x_8, 1, x_7);
 return x_8;
+}
+}
+}
+LEAN_EXPORT lean_object* lp_VerifiableAuthSpec___private_VerifiableAuth_StateModel_0__VerifiableAuth_lookupUserInList_match__1_splitter___redArg(lean_object* x_1, lean_object* x_2, lean_object* x_3) {
+_start:
+{
+if (lean_obj_tag(x_1) == 0)
+{
+lean_object* x_4; lean_object* x_5; 
+lean_dec(x_3);
+x_4 = lean_box(0);
+x_5 = lean_apply_1(x_2, x_4);
+return x_5;
+}
+else
+{
+lean_object* x_6; lean_object* x_7; lean_object* x_8; 
+lean_dec(x_2);
+x_6 = lean_ctor_get(x_1, 0);
+lean_inc(x_6);
+x_7 = lean_ctor_get(x_1, 1);
+lean_inc(x_7);
+lean_dec_ref(x_1);
+x_8 = lean_apply_2(x_3, x_6, x_7);
+return x_8;
+}
+}
+}
+LEAN_EXPORT lean_object* lp_VerifiableAuthSpec___private_VerifiableAuth_StateModel_0__VerifiableAuth_lookupUserInList_match__1_splitter(lean_object* x_1, lean_object* x_2, lean_object* x_3, lean_object* x_4) {
+_start:
+{
+if (lean_obj_tag(x_2) == 0)
+{
+lean_object* x_5; lean_object* x_6; 
+lean_dec(x_4);
+x_5 = lean_box(0);
+x_6 = lean_apply_1(x_3, x_5);
+return x_6;
+}
+else
+{
+lean_object* x_7; lean_object* x_8; lean_object* x_9; 
+lean_dec(x_3);
+x_7 = lean_ctor_get(x_2, 0);
+lean_inc(x_7);
+x_8 = lean_ctor_get(x_2, 1);
+lean_inc(x_8);
+lean_dec_ref(x_2);
+x_9 = lean_apply_2(x_4, x_7, x_8);
+return x_9;
 }
 }
 }

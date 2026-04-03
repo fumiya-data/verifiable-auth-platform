@@ -5,6 +5,13 @@ machine implemented in `../engine/src/core` and refined by the CLI, audit, and
 metrics behavior in `../engine/src/cli`, `../engine/src/app`, and
 `../engine/src/storage`.
 
+## Package Layout
+
+- `lakefile.toml` defines the Lake package and the `VerifiableAuth` library.
+- `lean-toolchain` pins the Lean toolchain used by the spec.
+- `VerifiableAuth.lean` is the package root import for downstream consumers.
+- `VerifiableAuth/` contains the module graph for the state model and proofs.
+
 ## Build
 
 ```powershell

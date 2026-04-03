@@ -1,16 +1,13 @@
 {"synthetic": false,
  "schemaVersion": "2025-09-10",
  "outputs":
- {"o": ["96757ee2ebb75218.olean"],
-  "i": "80376db598081347.ilean",
+ {"o": ["ea45ea8ac93b84ea.olean"],
+  "i": "f312b6b151979823.ilean",
   "c": "9a453662cd17792b.c"},
  "log":
  [{"message":
    ".> LEAN_PATH=C:\\Users\\kinbo\\verifiable-auth-platform\\spec\\.lake\\build\\lib\\lean c:\\Users\\kinbo\\.elan\\toolchains\\leanprover--lean4---v4.29.0\\bin\\lean.exe C:\\Users\\kinbo\\verifiable-auth-platform\\spec\\VerifiableAuth\\Types.lean -o C:\\Users\\kinbo\\verifiable-auth-platform\\spec\\.lake\\build\\lib\\lean\\VerifiableAuth\\Types.olean -i C:\\Users\\kinbo\\verifiable-auth-platform\\spec\\.lake\\build\\lib\\lean\\VerifiableAuth\\Types.ilean -c C:\\Users\\kinbo\\verifiable-auth-platform\\spec\\.lake\\build\\ir\\VerifiableAuth\\Types.c --setup C:\\Users\\kinbo\\verifiable-auth-platform\\spec\\.lake\\build\\ir\\VerifiableAuth\\Types.setup.json --json",
-   "level": "trace"},
-  {"message":
-   "VerifiableAuth/Types.lean:39:7: `String.data` has been deprecated: Use `String.toList` instead",
-   "level": "warning"}],
+   "level": "trace"}],
  "inputs":
  [["VerifiableAuth.Types:deps",
    [["deps",
@@ -25,10 +22,10 @@
   ["Lean 4.29.0, commit 98dc76e3c0a9b856c9b98726b713fb04fab16740",
    "60bb08ef22408c8a"],
   ["C:\\Users\\kinbo\\verifiable-auth-platform\\spec\\VerifiableAuth\\Types.lean",
-   "a609fcda97fd9df4"],
+   "7a1f87c3fa1685f4"],
   ["options", "00000000000006bb"],
   ["isModule: false", "feefd2a0d3a1847e"],
   ["Module.name: VerifiableAuth.Types", "5780468b2ae1e54c"],
   ["Package.id?: (some VerifiableAuthSpec)", "d16f9423abff41d5"],
   ["Module.leanArgs: #[]", "00000000000006bb"]],
- "depHash": "e16ecfaa67eb7b3b"}
+ "depHash": "c0f0dbebfb71f4d0"}

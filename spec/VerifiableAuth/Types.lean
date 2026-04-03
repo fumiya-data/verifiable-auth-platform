@@ -36,7 +36,7 @@ private def digestChar (acc : Nat) (c : Char) : Nat :=
   acc * 16777619 + c.toNat
 
 private def digestString (seed : Nat) (text : String) : Nat :=
-  text.data.foldl digestChar seed
+  text.toList.foldl digestChar seed
 
 def derivePasswordHash (password : Password) (salt : Salt) : PasswordHash :=
   { digest := digestString (digestString 2166136261 password) salt.material }

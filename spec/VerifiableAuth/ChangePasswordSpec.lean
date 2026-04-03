@@ -19,7 +19,10 @@ def changePassword (state : AuthState) (oldPassword : Password) (newPassword : P
 theorem changePassword_preserves_session
     (state : AuthState) (oldPassword newPassword : Password) :
     (changePassword state oldPassword newPassword).state.authenticated = state.authenticated := by
-  simp [changePassword, AuthState.replaceUser]
+  unfold changePassword
+  split <;> try rfl
+  split <;> try rfl
+  split <;> rfl
 
 theorem changePassword_unauthorized_is_noop
     (state : AuthState) (oldPassword newPassword : Password)

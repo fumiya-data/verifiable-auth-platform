@@ -5,6 +5,10 @@ namespace VerifiableAuth
 def User.passwordMatches (user : User) (password : Password) : Prop :=
   verifyPassword password user.salt user.passwordHash
 
+instance (user : User) (password : Password) : Decidable (user.passwordMatches password) := by
+  unfold User.passwordMatches verifyPassword
+  infer_instance
+
 def User.noteFailedLogin (user : User) : User :=
   let attempts := user.failedAttempts + 1
   { user with
@@ -67,20 +71,73 @@ def User.CredentialsBound (user : User) : Prop :=
 def AuthState.CredentialsBound (state : AuthState) : Prop :=
   ∀ user, user ∈ state.users → user.CredentialsBound
 
+private theorem lookupUserInList_mem
+    {users : List User}
+    {loginId : LoginId}
+    {user : User} :
+    lookupUserInList users loginId = some user → user ∈ users := by
+  induction users with
+  | nil =>
+      simp [lookupUserInList]
+  | cons current rest ih =>
+      by_cases hEq : current.loginId = loginId
+      · intro hLookup
+        simp [lookupUserInList, hEq] at hLookup
+        subst hLookup
+        simp
+      · intro hLookup
+        simp [lookupUserInList, hEq] at hLookup
+        have hRest : user ∈ rest := ih hLookup
+        simp [hRest]
+
+private theorem lookupUserInList_append_of_found
+    {users : List User}
+    {loginId : LoginId}
+    {user extra : User}
+    (hLookup : lookupUserInList users loginId = some user) :
+    lookupUserInList (users ++ [extra]) loginId = some user := by
+  induction users with
+  | nil =>
+      simp [lookupUserInList] at hLookup
+  | cons current rest ih =>
+      by_cases hEq : current.loginId = loginId
+      · simp [lookupUserInList, hEq] at hLookup ⊢
+        simp [hLookup]
+      · simp [lookupUserInList, hEq] at hLookup ⊢
+        exact ih hLookup
+
+theorem AuthState.lookupUser?_mem_users
+    {state : AuthState}
+    {loginId : LoginId}
+    {user : User} :
+    state.lookupUser? loginId = some user → user ∈ state.users :=
+  lookupUserInList_mem
+
+theorem AuthState.lookupUser?_insertUser_of_found
+    (state : AuthState)
+    (loginId : LoginId)
+    (user inserted : User)
+    (hLookup : state.lookupUser? loginId = some user) :
+    (state.insertUser inserted).lookupUser? loginId = some user := by
+  exact lookupUserInList_append_of_found hLookup
+
 theorem User.noteFailedLogin_preservesCredentialsBound
-    (user : User) :
+    (user : User)
+    (hBound : user.CredentialsBound) :
     (user.noteFailedLogin).CredentialsBound := by
-  simp [User.CredentialsBound, User.noteFailedLogin]
+  simpa [User.CredentialsBound, User.noteFailedLogin] using hBound
 
 theorem User.clearFailedAttempts_preservesCredentialsBound
-    (user : User) :
+    (user : User)
+    (hBound : user.CredentialsBound) :
     (user.clearFailedAttempts).CredentialsBound := by
-  simp [User.CredentialsBound, User.clearFailedAttempts]
+  simpa [User.CredentialsBound, User.clearFailedAttempts] using hBound
 
 theorem User.changePassword_preservesCredentialsBound
-    (user : User) (newPassword : Password) :
+    (user : User) (newPassword : Password)
+    (hBound : user.CredentialsBound) :
     (user.changePassword newPassword).CredentialsBound := by
-  simp [User.CredentialsBound, User.changePassword, Salt.rotate]
+  simpa [User.CredentialsBound, User.changePassword, Salt.rotate] using hBound
 
 theorem mkRegisteredUser_preservesCredentialsBound
     (loginId : LoginId) (password : Password) :
@@ -96,21 +153,13 @@ private theorem replaceUserInList_preservesCredentialsBound :
       simp [replaceUserInList] at hMem
   | current :: rest, updated, hUsers, hUpdated, user, hMem => by
       by_cases hEq : current.loginId = updated.loginId
-      · simp [replaceUserInList, hEq] at hMem ⊢
+      · simp [replaceUserInList, hEq] at hMem
         rcases hMem with rfl | hRest
         · exact hUpdated
-        · exact replaceUserInList_preservesCredentialsBound
-            rest
-            updated
-            (by
-              intro member hMember
-              exact hUsers member (by simp [hMember]))
-            hUpdated
-            user
-            hRest
-      · simp [replaceUserInList, hEq] at hMem ⊢
+        · exact hUsers user (by simp [hRest])
+      · simp [replaceUserInList, hEq] at hMem
         rcases hMem with rfl | hRest
-        · exact hUsers current (by simp)
+        · exact hUsers user (by simp)
         · exact replaceUserInList_preservesCredentialsBound
             rest
             updated

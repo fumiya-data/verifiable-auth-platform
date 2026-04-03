@@ -34,7 +34,30 @@ theorem register_keeps_session_shape
     (state : AuthState) (loginId : LoginId) (password : Password)
     (hSession : I11_SessionIsOptionalLoginId state) :
     I11_SessionIsOptionalLoginId (register state loginId password).state := by
-  simpa [I11_SessionIsOptionalLoginId, register_preserves_session] using hSession
+  unfold I11_SessionIsOptionalLoginId at hSession ⊢
+  have hPreserve := register_preserves_session state loginId password
+  cases hAuth : state.authenticated with
+  | none =>
+      rw [hAuth] at hPreserve
+      simp [AuthState.SessionConsistent, hPreserve]
+  | some authLoginId =>
+      simp [AuthState.SessionConsistent, hAuth] at hSession
+      rcases hSession with ⟨user, hFound⟩
+      rw [AuthState.SessionConsistent, hPreserve]
+      simp [hAuth]
+      cases hExisting : state.lookupUser? loginId with
+      | some existing =>
+          simp [register, hExisting]
+          exact ⟨user, hFound⟩
+      | none =>
+          simp [register, hExisting]
+          exact ⟨user,
+            AuthState.lookupUser?_insertUser_of_found
+              state
+              authLoginId
+              user
+              (mkRegisteredUser loginId password)
+              hFound⟩
 
 theorem register_preserves_construction_invariants
     (state : AuthState) (loginId : LoginId) (password : Password)
@@ -55,49 +78,61 @@ theorem login_preserves_construction_invariants
     (hConstruction : ConstructionInvariants state) :
     ConstructionInvariants (login state loginId password).state := by
   unfold ConstructionInvariants at hConstruction ⊢
-  simp [login]
-  split
-  · simpa using hConstruction
-  · split
-    · simpa using hConstruction
-    · rename_i user
-      by_cases hLocked : user.lockState = .locked
-      · simp [hLocked]
-        simpa using hConstruction
-      · by_cases hPassword : user.passwordMatches password
-        · simp [hLocked, hPassword, AuthState.setAuthenticated]
-          exact AuthState.replaceUser_preservesCredentialsBound
-            state
-            (user.clearFailedAttempts)
-            hConstruction
-            (user.clearFailedAttempts_preservesCredentialsBound)
-        · simp [hLocked, hPassword]
-          exact AuthState.replaceUser_preservesCredentialsBound
-            state
-            (user.noteFailedLogin)
-            hConstruction
-            (user.noteFailedLogin_preservesCredentialsBound)
+  cases hAuth : state.authenticated with
+  | some current =>
+      simp [login, hAuth]
+      exact hConstruction
+  | none =>
+      cases hLookup : state.lookupUser? loginId with
+      | none =>
+          simp [login, hAuth, hLookup]
+          exact hConstruction
+      | some user =>
+          by_cases hLocked : user.lockState = .locked
+          · simp [login, hAuth, hLookup, hLocked]
+            exact hConstruction
+          · by_cases hPassword : user.passwordMatches password
+            · simp [login, hAuth, hLookup, hLocked, hPassword]
+              exact AuthState.replaceUser_preservesCredentialsBound
+                state
+                (user.clearFailedAttempts)
+                hConstruction
+                (user.clearFailedAttempts_preservesCredentialsBound
+                  (hConstruction user (state.lookupUser?_mem_users hLookup)))
+            · simp [login, hAuth, hLookup, hLocked, hPassword]
+              exact AuthState.replaceUser_preservesCredentialsBound
+                state
+                (user.noteFailedLogin)
+                hConstruction
+                (user.noteFailedLogin_preservesCredentialsBound
+                  (hConstruction user (state.lookupUser?_mem_users hLookup)))
 
 theorem changePassword_preserves_construction_invariants
     (state : AuthState) (oldPassword newPassword : Password)
     (hConstruction : ConstructionInvariants state) :
     ConstructionInvariants (changePassword state oldPassword newPassword).state := by
   unfold ConstructionInvariants at hConstruction ⊢
-  simp [changePassword]
-  split
-  · simpa using hConstruction
-  · split
-    · simpa using hConstruction
-    · rename_i user
-      by_cases hPassword : user.passwordMatches oldPassword
-      · simp [hPassword]
-        exact AuthState.replaceUser_preservesCredentialsBound
-          state
-          (user.changePassword newPassword)
-          hConstruction
-          (user.changePassword_preservesCredentialsBound newPassword)
-      · simp [hPassword]
-        simpa using hConstruction
+  cases hAuth : state.authenticated with
+  | none =>
+      simp [changePassword, hAuth]
+      exact hConstruction
+  | some loginId =>
+      cases hLookup : state.lookupUser? loginId with
+      | none =>
+          simp [changePassword, hAuth, hLookup]
+          exact hConstruction
+      | some user =>
+          by_cases hPassword : user.passwordMatches oldPassword
+          · simp [changePassword, hAuth, hLookup, hPassword]
+            exact AuthState.replaceUser_preservesCredentialsBound
+              state
+              (user.changePassword newPassword)
+              hConstruction
+              (user.changePassword_preservesCredentialsBound
+                newPassword
+                (hConstruction user (state.lookupUser?_mem_users hLookup)))
+          · simp [changePassword, hAuth, hLookup, hPassword]
+            exact hConstruction
 
 theorem logout_preserves_construction_invariants
     (state : AuthState)

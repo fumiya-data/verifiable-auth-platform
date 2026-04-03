@@ -13,7 +13,8 @@ def register (state : AuthState) (loginId : LoginId) (password : Password) :
 theorem register_preserves_session
     (state : AuthState) (loginId : LoginId) (password : Password) :
     (register state loginId password).state.authenticated = state.authenticated := by
-  simp [register, AuthState.insertUser]
+  unfold register
+  split <;> rfl
 
 theorem register_success_initializes_active_user
     (loginId : LoginId) (password : Password) :

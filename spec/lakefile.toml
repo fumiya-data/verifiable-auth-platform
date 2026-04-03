@@ -1,0 +1,5 @@
+name = "VerifiableAuthSpec"
+defaultTargets = ["VerifiableAuth"]
+
+[[lean_lib]]
+name = "VerifiableAuth"
