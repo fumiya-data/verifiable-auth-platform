@@ -6,12 +6,14 @@ on:
       - "engine/**"
       - "tests/**"
       - "scripts/run-engine-tests.sh"
+      - "scripts/run-engine-tests.ps1"
       - ".github/workflows/engine.yml"
   pull_request:
     paths:
       - "engine/**"
       - "tests/**"
       - "scripts/run-engine-tests.sh"
+      - "scripts/run-engine-tests.ps1"
 
 jobs:
   c-engine:

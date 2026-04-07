@@ -4,16 +4,24 @@ on:
   push:
     paths:
       - "analysis/**"
+      - "engine/**"
+      - "fixtures/**"
       - "observability/**"
       - "scripts/**"
-      - "tests/e2e/**"
+      - "spec/**"
+      - "tests/**"
+      - "tui/**"
       - ".github/workflows/e2e.yml"
   pull_request:
     paths:
       - "analysis/**"
+      - "engine/**"
+      - "fixtures/**"
       - "observability/**"
       - "scripts/**"
-      - "tests/e2e/**"
+      - "spec/**"
+      - "tests/**"
+      - "tui/**"
 
 jobs:
   verification:
@@ -26,6 +34,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y ninja-build clang cmake
       - name: Install analysis dependencies
         run: python -m pip install -r analysis/requirements.txt
       - name: Run verification flow

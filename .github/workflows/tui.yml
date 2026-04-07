@@ -4,10 +4,14 @@ on:
   push:
     paths:
       - "tui/**"
+      - "scripts/run-tui.sh"
+      - "scripts/run-tui.ps1"
       - ".github/workflows/tui.yml"
   pull_request:
     paths:
       - "tui/**"
+      - "scripts/run-tui.sh"
+      - "scripts/run-tui.ps1"
 
 jobs:
   go-tui:

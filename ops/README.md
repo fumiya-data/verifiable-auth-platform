@@ -5,9 +5,10 @@ and CI.
 
 ## Contents
 
-- `ci/`
-  - CI definitions for spec, engine, TUI, and end-to-end verification.
 - `env/`
   - Example environment files for local runs.
 - `docker/`
   - Development container bootstrap.
+
+The active GitHub Actions workflow definitions live under
+[`../.github/workflows/`](../.github/workflows/).

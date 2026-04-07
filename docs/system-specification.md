@@ -1,5 +1,18 @@
 # Verifiable Auth Platform System Specification
 
+Companion traceability documents:
+
+- [`README.md`](./README.md)
+- [`spec-engine-comparison-table.md`](./spec-engine-comparison-table.md)
+- [`spec-engine-alignment.md`](./spec-engine-alignment.md)
+- [`engine-cli-contract.md`](./engine-cli-contract.md)
+- [`state-machine.md`](./state-machine.md)
+
+The comparison table is the primary evidence artifact for this project. It is
+the document that makes the Lean model and the C engine implementation face
+each other directly, including the points where the implementation must become
+more concrete than the formal model.
+
 ## 1. Purpose
 
 The Verifiable Auth Platform is a local authentication foundation whose core property is verifiability. The system is not defined merely by the presence of authentication features, but by the requirement that its behavior can be specified, implemented, tested, observed, and analyzed in a consistent and traceable manner.

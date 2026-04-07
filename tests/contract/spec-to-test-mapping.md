@@ -3,6 +3,11 @@
 This matrix records where the documented behavior is represented formally in
 Lean and where it is executed in the C engine test suite.
 
+For the full Lean-to-C comparison argument, see
+[`../../docs/spec-engine-comparison-table.md`](../../docs/spec-engine-comparison-table.md).
+For the CLI boundary consumed by the TUI, see
+[`../../docs/engine-cli-contract.md`](../../docs/engine-cli-contract.md).
+
 | Requirement | Lean source | Engine evidence |
 | --- | --- | --- |
 | State is `users + authenticated` | `VerifiableAuth.Types.AuthState` | `engine/include/auth/state.h`, unit and integration tests |
