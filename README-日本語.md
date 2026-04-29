@@ -40,6 +40,11 @@ Verifiable Auth Platform は、仕様、実装、テスト、観測可能性の�
 - [ADR 0003: Go TUI を薄い運用ラッパーとして保つ](./docs-jp/adr/0003-TUIの薄い運用ラッパーとしてGoを採用.md)
 - [ADR 0004: 分析とレポート層に Python を採用する](./docs-jp/adr/0004-分析とレポート層にPythonを採用.md)
 
+## ライセンス
+
+このリポジトリには、現時点ではオープンソースライセンスを付与していません。
+現在の notice は [`LICENSE`](./LICENSE) を参照してください。
+
 ## 前提環境
 
 - `elan` 経由の Lean 4

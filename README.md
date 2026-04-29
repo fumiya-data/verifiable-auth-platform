@@ -42,6 +42,11 @@ changing as the project is developed.
 - [ADR 0003: Keep the Go TUI as a Thin Operational Wrapper](./docs/adr/0003-thin-tui-boundary.md)
 - [ADR 0004: Use Python for Analysis and Reporting](./docs/adr/0004-python-analysis-and-reporting.md)
 
+## License
+
+No open source license is currently granted for this repository. See
+[`LICENSE`](./LICENSE) for the current notice.
+
 ## Prerequisites
 
 - Lean 4 via `elan`
