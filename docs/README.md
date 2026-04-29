@@ -13,7 +13,9 @@ specified, implemented, and verified.
    - A shorter cross-layer status summary.
 4. [`engine-cli-contract.md`](./engine-cli-contract.md)
    - The stable CLI and JSON boundary consumed by the Go TUI.
-5. [`state-machine.md`](./state-machine.md)
+5. [`go-tui-runbook.md`](./go-tui-runbook.md)
+   - The operational runbook for building, launching, and extending the Go TUI.
+6. [`state-machine.md`](./state-machine.md)
    - The concrete auth state machine view used to explain operation flow.
 
 ## Core Documents
@@ -26,6 +28,8 @@ specified, implemented, and verified.
   - Shorter summary of the current cross-layer alignment status.
 - [`engine-cli-contract.md`](./engine-cli-contract.md)
   - Stable command names, arguments, JSON envelope, and exit-code policy.
+- [`go-tui-runbook.md`](./go-tui-runbook.md)
+  - Build, launch, smoke-test, troubleshooting, and extension notes for the Go TUI.
 - [`state-machine.md`](./state-machine.md)
   - Focused explanation of the core password-auth state transitions.
 

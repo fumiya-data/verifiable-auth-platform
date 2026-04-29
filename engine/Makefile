@@ -1,6 +1,7 @@
 CC ?= gcc
 AR ?= ar
 BUILD_DIR ?= build
+BUILD_MARKER := $(BUILD_DIR)/.dir
 RM ?= rm -rf
 EXEEXT ?=
 CPPFLAGS ?= -Iinclude -Isrc/crypto
@@ -91,40 +92,41 @@ test: build
 	$(BUILD_DIR)/test_cli_golden_json$(EXEEXT)
 	$(BUILD_DIR)/test_cli_corrupt_state$(EXEEXT)
 
-$(BUILD_DIR):
+$(BUILD_MARKER):
 	mkdir -p $(BUILD_DIR)
+	touch $(BUILD_MARKER)
 
-$(BUILD_DIR)/libengine_crypto.a: $(CRYPTO_OBJECTS) | $(BUILD_DIR)
+$(BUILD_DIR)/libengine_crypto.a: $(CRYPTO_OBJECTS) | $(BUILD_MARKER)
 	$(AR) rcs $@ $^
 
-$(BUILD_DIR)/libengine_auth_core.a: $(CORE_OBJECTS) | $(BUILD_DIR)
+$(BUILD_DIR)/libengine_auth_core.a: $(CORE_OBJECTS) | $(BUILD_MARKER)
 	$(AR) rcs $@ $^
 
-$(BUILD_DIR)/libengine_util.a: $(UTIL_OBJECTS) | $(BUILD_DIR)
+$(BUILD_DIR)/libengine_util.a: $(UTIL_OBJECTS) | $(BUILD_MARKER)
 	$(AR) rcs $@ $^
 
-$(BUILD_DIR)/libengine_storage.a: $(STORAGE_OBJECTS) | $(BUILD_DIR)
+$(BUILD_DIR)/libengine_storage.a: $(STORAGE_OBJECTS) | $(BUILD_MARKER)
 	$(AR) rcs $@ $^
 
-$(BUILD_DIR)/libengine_cli.a: $(CLI_OBJECTS) | $(BUILD_DIR)
+$(BUILD_DIR)/libengine_cli.a: $(CLI_OBJECTS) | $(BUILD_MARKER)
 	$(AR) rcs $@ $^
 
-$(BUILD_DIR)/%.o: src/crypto/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: src/crypto/%.c | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o: src/core/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: src/core/%.c | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o: src/util/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: src/util/%.c | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o: src/storage/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: src/storage/%.c | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o: src/cli/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: src/cli/%.c | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/service_main.o: src/app/service_main.c | $(BUILD_DIR)
+$(BUILD_DIR)/service_main.o: src/app/service_main.c | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/engine_cli$(EXEEXT): src/app/cli_main.c \
@@ -132,7 +134,7 @@ $(BUILD_DIR)/engine_cli$(EXEEXT): src/app/cli_main.c \
 	$(BUILD_DIR)/libengine_storage.a \
 	$(BUILD_DIR)/libengine_util.a \
 	$(BUILD_DIR)/libengine_auth_core.a \
-	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< \
 		$(BUILD_DIR)/libengine_cli.a \
 		$(BUILD_DIR)/libengine_storage.a \
@@ -141,32 +143,32 @@ $(BUILD_DIR)/engine_cli$(EXEEXT): src/app/cli_main.c \
 		$(BUILD_DIR)/libengine_crypto.a \
 		$(LDLIBS) -o $@
 
-$(BUILD_DIR)/test_hash_adapter$(EXEEXT): tests/unit/test_hash_adapter.c $(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+$(BUILD_DIR)/test_hash_adapter$(EXEEXT): tests/unit/test_hash_adapter.c $(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(BUILD_DIR)/libengine_crypto.a $(LDLIBS) -o $@
 
-$(BUILD_DIR)/test_salt_adapter$(EXEEXT): tests/unit/test_salt_adapter.c $(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+$(BUILD_DIR)/test_salt_adapter$(EXEEXT): tests/unit/test_salt_adapter.c $(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(BUILD_DIR)/libengine_crypto.a $(LDLIBS) -o $@
 
-$(BUILD_DIR)/test_validation$(EXEEXT): tests/unit/test_validation.c $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+$(BUILD_DIR)/test_validation$(EXEEXT): tests/unit/test_validation.c $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a $(LDLIBS) -o $@
 
-$(BUILD_DIR)/test_register$(EXEEXT): tests/unit/test_register.c $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+$(BUILD_DIR)/test_register$(EXEEXT): tests/unit/test_register.c $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a $(LDLIBS) -o $@
 
-$(BUILD_DIR)/test_login$(EXEEXT): tests/unit/test_login.c $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+$(BUILD_DIR)/test_login$(EXEEXT): tests/unit/test_login.c $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a $(LDLIBS) -o $@
 
-$(BUILD_DIR)/test_change_password$(EXEEXT): tests/unit/test_change_password.c $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+$(BUILD_DIR)/test_change_password$(EXEEXT): tests/unit/test_change_password.c $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a $(LDLIBS) -o $@
 
-$(BUILD_DIR)/test_logout$(EXEEXT): tests/unit/test_logout.c $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+$(BUILD_DIR)/test_logout$(EXEEXT): tests/unit/test_logout.c $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< $(BUILD_DIR)/libengine_auth_core.a $(BUILD_DIR)/libengine_crypto.a $(LDLIBS) -o $@
 
 $(BUILD_DIR)/test_file_user_store$(EXEEXT): tests/integration/test_file_user_store.c \
 	$(BUILD_DIR)/libengine_storage.a \
 	$(BUILD_DIR)/libengine_util.a \
 	$(BUILD_DIR)/libengine_auth_core.a \
-	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< \
 		$(BUILD_DIR)/libengine_storage.a \
 		$(BUILD_DIR)/libengine_util.a \
@@ -178,7 +180,7 @@ $(BUILD_DIR)/test_file_session_store$(EXEEXT): tests/integration/test_file_sessi
 	$(BUILD_DIR)/libengine_storage.a \
 	$(BUILD_DIR)/libengine_util.a \
 	$(BUILD_DIR)/libengine_auth_core.a \
-	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< \
 		$(BUILD_DIR)/libengine_storage.a \
 		$(BUILD_DIR)/libengine_util.a \
@@ -190,7 +192,7 @@ $(BUILD_DIR)/test_file_audit_log$(EXEEXT): tests/integration/test_file_audit_log
 	$(BUILD_DIR)/libengine_storage.a \
 	$(BUILD_DIR)/libengine_util.a \
 	$(BUILD_DIR)/libengine_auth_core.a \
-	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< \
 		$(BUILD_DIR)/libengine_storage.a \
 		$(BUILD_DIR)/libengine_util.a \
@@ -203,7 +205,7 @@ $(BUILD_DIR)/test_cli_register$(EXEEXT): tests/integration/test_cli_register.c \
 	$(BUILD_DIR)/libengine_storage.a \
 	$(BUILD_DIR)/libengine_util.a \
 	$(BUILD_DIR)/libengine_auth_core.a \
-	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< \
 		$(BUILD_DIR)/libengine_cli.a \
 		$(BUILD_DIR)/libengine_storage.a \
@@ -217,7 +219,7 @@ $(BUILD_DIR)/test_cli_login$(EXEEXT): tests/integration/test_cli_login.c \
 	$(BUILD_DIR)/libengine_storage.a \
 	$(BUILD_DIR)/libengine_util.a \
 	$(BUILD_DIR)/libengine_auth_core.a \
-	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< \
 		$(BUILD_DIR)/libengine_cli.a \
 		$(BUILD_DIR)/libengine_storage.a \
@@ -231,7 +233,7 @@ $(BUILD_DIR)/test_cli_change_password$(EXEEXT): tests/integration/test_cli_chang
 	$(BUILD_DIR)/libengine_storage.a \
 	$(BUILD_DIR)/libengine_util.a \
 	$(BUILD_DIR)/libengine_auth_core.a \
-	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< \
 		$(BUILD_DIR)/libengine_cli.a \
 		$(BUILD_DIR)/libengine_storage.a \
@@ -245,7 +247,7 @@ $(BUILD_DIR)/test_cli_show_audit$(EXEEXT): tests/integration/test_cli_show_audit
 	$(BUILD_DIR)/libengine_storage.a \
 	$(BUILD_DIR)/libengine_util.a \
 	$(BUILD_DIR)/libengine_auth_core.a \
-	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< \
 		$(BUILD_DIR)/libengine_cli.a \
 		$(BUILD_DIR)/libengine_storage.a \
@@ -259,7 +261,7 @@ $(BUILD_DIR)/test_cli_show_metrics$(EXEEXT): tests/integration/test_cli_show_met
 	$(BUILD_DIR)/libengine_storage.a \
 	$(BUILD_DIR)/libengine_util.a \
 	$(BUILD_DIR)/libengine_auth_core.a \
-	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< \
 		$(BUILD_DIR)/libengine_cli.a \
 		$(BUILD_DIR)/libengine_storage.a \
@@ -273,7 +275,7 @@ $(BUILD_DIR)/test_cli_golden_json$(EXEEXT): tests/integration/test_cli_golden_js
 	$(BUILD_DIR)/libengine_storage.a \
 	$(BUILD_DIR)/libengine_util.a \
 	$(BUILD_DIR)/libengine_auth_core.a \
-	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< \
 		$(BUILD_DIR)/libengine_cli.a \
 		$(BUILD_DIR)/libengine_storage.a \
@@ -287,7 +289,7 @@ $(BUILD_DIR)/test_cli_corrupt_state$(EXEEXT): tests/integration/test_cli_corrupt
 	$(BUILD_DIR)/libengine_storage.a \
 	$(BUILD_DIR)/libengine_util.a \
 	$(BUILD_DIR)/libengine_auth_core.a \
-	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_DIR)
+	$(BUILD_DIR)/libengine_crypto.a | $(BUILD_MARKER)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< \
 		$(BUILD_DIR)/libengine_cli.a \
 		$(BUILD_DIR)/libengine_storage.a \

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BUILD_DIR="${ROOT_DIR}/engine/.build"
+BUILD_DIR="${ROOT_DIR}/engine/.build-sh"
 
 run_with_cmake() {
   cmake -S "${ROOT_DIR}/engine" -B "${BUILD_DIR}"

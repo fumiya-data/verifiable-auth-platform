@@ -14,6 +14,9 @@ implement authentication rules locally.
 go run ./cmd/auth-tui
 ```
 
+For the full build, launch, smoke-test, and extension workflow, see
+[`../docs/go-tui-runbook.md`](../docs/go-tui-runbook.md).
+
 ## Configuration
 
 - `--engine-path`

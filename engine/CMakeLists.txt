@@ -6,6 +6,10 @@ set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
+if (WIN32)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+endif()
+
 function(engine_apply_warnings target_name)
     if (MSVC)
         target_compile_options(${target_name} PRIVATE /W4 /WX)

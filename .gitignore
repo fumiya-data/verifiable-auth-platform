@@ -1,8 +1,10 @@
 .stcratch/
 .tmp-chrome-pdf-profile/
+.engine-data/
 engine/.scratch/
 tui/.scratch/
 engine/.build/
+engine/.build-*/
 engine/build/
 spec/.lake/
 analysis/output/*

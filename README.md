@@ -2,6 +2,29 @@
 
 Verifiable Auth Platform is a local authentication foundation centered on verifiability across specification, implementation, testing, and observability.
 
+## Project Status
+
+This repository is under active development and should not be treated as a
+finished product or production-ready authentication system yet. The current
+work is focused on making the specification, C engine, Go TUI, tests, and
+observability artifacts agree with each other in a verifiable way.
+
+Current progress:
+
+- The Lean specification and state-machine documents define the intended auth
+  behavior.
+- The C engine implements the local auth flows and exposes a JSON CLI contract.
+- The Go Bubble Tea TUI is an operational wrapper over that engine CLI, not a
+  separate implementation of auth rules.
+- Contract notes, golden outputs, E2E runbooks, and fixture checks are present
+  to keep the layers aligned.
+- The analysis and observability folders contain sample data and reporting
+  helpers, but they are still supporting artifacts rather than a completed
+  monitoring product.
+
+Expect interfaces, documentation, and verification coverage to continue
+changing as the project is developed.
+
 ## Documentation
 
 - [Documentation Index](./docs/README.md)
@@ -9,6 +32,7 @@ Verifiable Auth Platform is a local authentication foundation centered on verifi
 - [Lean Specification to C Engine Comparison Table](./docs/spec-engine-comparison-table.md)
 - [Specification and Engine Alignment](./docs/spec-engine-alignment.md)
 - [Engine CLI Contract](./docs/engine-cli-contract.md)
+- [Go TUI Runbook](./docs/go-tui-runbook.md)
 - [Authentication State Machine](./docs/state-machine.md)
 
 ## Architecture Decision Records
