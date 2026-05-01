@@ -1,7 +1,27 @@
 namespace VerifiableAuth
 
-abbrev LoginId := String
-abbrev Password := String
+structure LoginId where
+  value : String
+  deriving DecidableEq, Repr, BEq, Inhabited
+
+structure Password where
+  value : String
+  deriving DecidableEq, BEq, Inhabited
+
+instance : Coe String LoginId where
+  coe value := { value := value }
+
+instance : Coe String Password where
+  coe value := { value := value }
+
+instance : ToString LoginId where
+  toString loginId := loginId.value
+
+def ValidLoginId (loginId : LoginId) : Prop :=
+  loginId.value ≠ ""
+
+def ValidPassword (password : Password) : Prop :=
+  password.value ≠ ""
 
 def lockoutThreshold : Nat := 3
 
@@ -39,18 +59,39 @@ private def digestString (seed : Nat) (text : String) : Nat :=
   text.toList.foldl digestChar seed
 
 def derivePasswordHash (password : Password) (salt : Salt) : PasswordHash :=
-  { digest := digestString (digestString 2166136261 password) salt.material }
+  { digest := digestString (digestString 2166136261 password.value) salt.material }
 
 def verifyPassword (password : Password) (salt : Salt) (passwordHash : PasswordHash) : Prop :=
   derivePasswordHash password salt = passwordHash
 
-structure User where
-  loginId : LoginId
+structure Credential where
   salt : Salt
   passwordHash : PasswordHash
+  deriving DecidableEq, Repr, BEq, Inhabited
+
+namespace Credential
+
+def BoundTo (credential : Credential) (loginId : LoginId) : Prop :=
+  credential.salt.owner = loginId
+
+end Credential
+
+structure User where
+  loginId : LoginId
+  credential : Credential
   failedAttempts : Nat
   lockState : LockState
   deriving DecidableEq, Repr, BEq, Inhabited
+
+namespace User
+
+def salt (user : User) : Salt :=
+  user.credential.salt
+
+def passwordHash (user : User) : PasswordHash :=
+  user.credential.passwordHash
+
+end User
 
 structure AuthState where
   users : List User := []

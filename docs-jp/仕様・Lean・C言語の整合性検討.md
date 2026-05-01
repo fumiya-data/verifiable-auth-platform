@@ -13,10 +13,13 @@
 3 層は現在、次の中核挙動について整合しています。
 
 - 状態モデル: `users + authenticated session`
+- Lean の名目的な `LoginId` / `Password` wrapper は、engine 境界では C の文字列値へ refinement される
+- Lean の nested `Credential` model は、C engine の flat な `salt` / `password_hash` user field へ refinement される
 - 操作集合: `register`, `login`, `change_password`, `logout`
 - CLI 契約で公開される result code
 - ロックアウト閾値挙動と session 保持規則
 - salt と hash の両方を置換するパスワード変更意味論
+- 4 つの core operation すべてに対する Lean の `CoreInvariants` preservation
 - 監査イベントと導出メトリクスの observability mapping
 - `already_authenticated` を `LoginFailure` として記録しつつ、`login_failure_count` は増やさないという規則
 
@@ -45,6 +48,7 @@
 ## 実施済み検証
 
 - `spec/` における `lake build` が成功
+- Windows 上で `scripts/run-engine-tests.ps1` が成功し、CTest は 17/17 件成功
 - リポジトリには
   [`../scripts/run-engine-tests.sh`](../scripts/run-engine-tests.sh) による
   正規の engine 検証経路が定義済み

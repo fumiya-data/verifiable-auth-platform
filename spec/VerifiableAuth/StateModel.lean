@@ -3,7 +3,7 @@ import VerifiableAuth.Types
 namespace VerifiableAuth
 
 def User.passwordMatches (user : User) (password : Password) : Prop :=
-  verifyPassword password user.salt user.passwordHash
+  verifyPassword password user.credential.salt user.credential.passwordHash
 
 instance (user : User) (password : Password) : Decidable (user.passwordMatches password) := by
   unfold User.passwordMatches verifyPassword
@@ -16,31 +16,29 @@ def User.noteFailedLogin (user : User) : User :=
     lockState := if lockoutThreshold <= attempts then .locked else .active }
 
 def User.clearFailedAttempts (user : User) : User :=
-  { user with failedAttempts := 0 }
+  { user with failedAttempts := 0, lockState := .active }
 
 def User.changePassword (user : User) (newPassword : Password) : User :=
-  let newSalt := user.salt.rotate
+  let newSalt := user.credential.salt.rotate
   { user with
-    salt := newSalt
-    passwordHash := derivePasswordHash newPassword newSalt
+    credential := { salt := newSalt, passwordHash := derivePasswordHash newPassword newSalt }
     failedAttempts := 0
     lockState := .active }
 
 def mkRegisteredUser (loginId : LoginId) (password : Password) : User :=
   let salt := Salt.initial loginId
   { loginId := loginId
-    salt := salt
-    passwordHash := derivePasswordHash password salt
+    credential := { salt := salt, passwordHash := derivePasswordHash password salt }
     failedAttempts := 0
     lockState := .active }
 
-private def lookupUserInList (users : List User) (loginId : LoginId) : Option User :=
+def lookupUserInList (users : List User) (loginId : LoginId) : Option User :=
   match users with
   | [] => none
   | user :: rest =>
       if user.loginId = loginId then some user else lookupUserInList rest loginId
 
-private def replaceUserInList (users : List User) (updated : User) : List User :=
+def replaceUserInList (users : List User) (updated : User) : List User :=
   match users with
   | [] => []
   | user :: rest =>
@@ -65,11 +63,17 @@ def AuthState.clearSession (state : AuthState) : AuthState :=
 def AuthState.setAuthenticated (state : AuthState) (loginId : LoginId) : AuthState :=
   { state with authenticated := some loginId }
 
-def User.CredentialsBound (user : User) : Prop :=
-  user.salt.owner = user.loginId
+def User.CredentialSaltBound (user : User) : Prop :=
+  user.credential.BoundTo user.loginId
 
-def AuthState.CredentialsBound (state : AuthState) : Prop :=
-  ∀ user, user ∈ state.users → user.CredentialsBound
+def AuthState.CredentialSaltBound (state : AuthState) : Prop :=
+  ∀ user, user ∈ state.users → user.CredentialSaltBound
+
+abbrev User.CredentialsBound (user : User) : Prop :=
+  user.CredentialSaltBound
+
+abbrev AuthState.CredentialsBound (state : AuthState) : Prop :=
+  state.CredentialSaltBound
 
 private theorem lookupUserInList_mem
     {users : List User}
@@ -90,6 +94,24 @@ private theorem lookupUserInList_mem
         have hRest : user ∈ rest := ih hLookup
         simp [hRest]
 
+private theorem lookupUserInList_loginId
+    {users : List User}
+    {loginId : LoginId}
+    {user : User} :
+    lookupUserInList users loginId = some user → user.loginId = loginId := by
+  induction users with
+  | nil =>
+      simp [lookupUserInList]
+  | cons current rest ih =>
+      by_cases hEq : current.loginId = loginId
+      · intro hLookup
+        simp [lookupUserInList, hEq] at hLookup
+        subst hLookup
+        exact hEq
+      · intro hLookup
+        simp [lookupUserInList, hEq] at hLookup
+        exact ih hLookup
+
 private theorem lookupUserInList_append_of_found
     {users : List User}
     {loginId : LoginId}
@@ -106,12 +128,67 @@ private theorem lookupUserInList_append_of_found
       · simp [lookupUserInList, hEq] at hLookup ⊢
         exact ih hLookup
 
+private theorem lookupUserInList_none_loginId_ne :
+    ∀ {users : List User} {loginId : LoginId} {user : User},
+      lookupUserInList users loginId = none →
+      user ∈ users →
+      user.loginId ≠ loginId
+  | [], loginId, user, hLookup, hMem => by
+      simp at hMem
+  | current :: rest, loginId, user, hLookup, hMem => by
+      by_cases hCurrent : current.loginId = loginId
+      · simp [lookupUserInList, hCurrent] at hLookup
+      · simp [lookupUserInList, hCurrent] at hLookup
+        simp at hMem
+        rcases hMem with hUser | hRest
+        · subst hUser
+          exact hCurrent
+        · exact lookupUserInList_none_loginId_ne hLookup hRest
+
+private theorem lookupUserInList_replace_same :
+    ∀ {users : List User} {old updated : User},
+      lookupUserInList users updated.loginId = some old →
+      lookupUserInList (replaceUserInList users updated) updated.loginId = some updated
+  | [], old, updated, hLookup => by
+      simp [lookupUserInList] at hLookup
+  | current :: rest, old, updated, hLookup => by
+      by_cases hCurrent : current.loginId = updated.loginId
+      · simp [lookupUserInList, replaceUserInList, hCurrent]
+      · simp [lookupUserInList, replaceUserInList, hCurrent] at hLookup ⊢
+        exact lookupUserInList_replace_same hLookup
+
+theorem replaceUserInList_mem_old_or_updated :
+    ∀ {users : List User} {updated member : User},
+      member ∈ replaceUserInList users updated →
+      member = updated ∨ member ∈ users
+  | [], updated, member, hMem => by
+      simp [replaceUserInList] at hMem
+  | current :: rest, updated, member, hMem => by
+      by_cases hCurrent : current.loginId = updated.loginId
+      · simp [replaceUserInList, hCurrent] at hMem
+        rcases hMem with hUpdated | hRest
+        · exact Or.inl hUpdated
+        · exact Or.inr (by simp [hRest])
+      · simp [replaceUserInList, hCurrent] at hMem
+        rcases hMem with hCurrentMem | hRest
+        · exact Or.inr (by simp [hCurrentMem])
+        · rcases replaceUserInList_mem_old_or_updated hRest with hUpdated | hOld
+          · exact Or.inl hUpdated
+          · exact Or.inr (by simp [hOld])
+
 theorem AuthState.lookupUser?_mem_users
     {state : AuthState}
     {loginId : LoginId}
     {user : User} :
     state.lookupUser? loginId = some user → user ∈ state.users :=
   lookupUserInList_mem
+
+theorem AuthState.lookupUser?_loginId
+    {state : AuthState}
+    {loginId : LoginId}
+    {user : User} :
+    state.lookupUser? loginId = some user → user.loginId = loginId :=
+  lookupUserInList_loginId
 
 theorem AuthState.lookupUser?_insertUser_of_found
     (state : AuthState)
@@ -121,28 +198,55 @@ theorem AuthState.lookupUser?_insertUser_of_found
     (state.insertUser inserted).lookupUser? loginId = some user := by
   exact lookupUserInList_append_of_found hLookup
 
+theorem AuthState.loginId_ne_of_lookupUser?_none
+    {state : AuthState}
+    {loginId : LoginId}
+    {user : User}
+    (hLookup : state.lookupUser? loginId = none)
+    (hMem : user ∈ state.users) :
+    user.loginId ≠ loginId :=
+  lookupUserInList_none_loginId_ne hLookup hMem
+
+theorem AuthState.lookupUser?_replaceUser_same
+    {state : AuthState}
+    {old updated : User}
+    (hLookup : state.lookupUser? updated.loginId = some old) :
+    (state.replaceUser updated).lookupUser? updated.loginId = some updated :=
+  lookupUserInList_replace_same hLookup
+
+theorem AuthState.replaceUser_mem_old_or_updated
+    {state : AuthState}
+    {updated member : User}
+    (hMem : member ∈ (state.replaceUser updated).users) :
+    member = updated ∨ member ∈ state.users :=
+  replaceUserInList_mem_old_or_updated hMem
+
 theorem User.noteFailedLogin_preservesCredentialsBound
     (user : User)
     (hBound : user.CredentialsBound) :
     (user.noteFailedLogin).CredentialsBound := by
-  simpa [User.CredentialsBound, User.noteFailedLogin] using hBound
+  simpa [User.CredentialsBound, User.CredentialSaltBound, Credential.BoundTo,
+    User.noteFailedLogin] using hBound
 
 theorem User.clearFailedAttempts_preservesCredentialsBound
     (user : User)
     (hBound : user.CredentialsBound) :
     (user.clearFailedAttempts).CredentialsBound := by
-  simpa [User.CredentialsBound, User.clearFailedAttempts] using hBound
+  simpa [User.CredentialsBound, User.CredentialSaltBound, Credential.BoundTo,
+    User.clearFailedAttempts] using hBound
 
 theorem User.changePassword_preservesCredentialsBound
     (user : User) (newPassword : Password)
     (hBound : user.CredentialsBound) :
     (user.changePassword newPassword).CredentialsBound := by
-  simpa [User.CredentialsBound, User.changePassword, Salt.rotate] using hBound
+  simpa [User.CredentialsBound, User.CredentialSaltBound, Credential.BoundTo,
+    User.changePassword, Salt.rotate] using hBound
 
 theorem mkRegisteredUser_preservesCredentialsBound
     (loginId : LoginId) (password : Password) :
     (mkRegisteredUser loginId password).CredentialsBound := by
-  simp [User.CredentialsBound, mkRegisteredUser, Salt.initial]
+  simp [User.CredentialsBound, User.CredentialSaltBound, Credential.BoundTo,
+    mkRegisteredUser, Salt.initial]
 
 private theorem replaceUserInList_preservesCredentialsBound :
     ∀ users updated,

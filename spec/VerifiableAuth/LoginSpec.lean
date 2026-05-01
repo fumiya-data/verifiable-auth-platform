@@ -1,4 +1,4 @@
-import VerifiableAuth.RegisterSpec
+import VerifiableAuth.WellFormed
 
 namespace VerifiableAuth
 
@@ -44,5 +44,27 @@ theorem login_success_sets_authenticated
     (login state loginId password).state.authenticated = some loginId := by
   simp [login, hUnauthenticated, hUser, hUnlocked, hPassword, AuthState.replaceUser,
     AuthState.setAuthenticated]
+
+theorem login_success_requires_existing_active_matching_user
+    (state : AuthState) (loginId : LoginId) (password : Password)
+    (hSuccess : (login state loginId password).result = .success) :
+    ∃ user,
+      state.lookupUser? loginId = some user ∧
+      user.lockState = .active ∧
+      user.passwordMatches password := by
+  cases hAuth : state.authenticated with
+  | some current =>
+      simp [login, hAuth] at hSuccess
+  | none =>
+      cases hLookup : state.lookupUser? loginId with
+      | none =>
+          simp [login, hAuth, hLookup] at hSuccess
+      | some user =>
+          by_cases hLocked : user.lockState = .locked
+          · simp [login, hAuth, hLookup, hLocked] at hSuccess
+          · by_cases hPassword : user.passwordMatches password
+            · exact ⟨user, rfl, User.active_of_not_locked hLocked, hPassword⟩
+            · simp [login, hAuth, hLookup, hLocked, hPassword] at hSuccess
+              split at hSuccess <;> cases hSuccess
 
 end VerifiableAuth

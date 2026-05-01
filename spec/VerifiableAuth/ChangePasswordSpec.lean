@@ -1,4 +1,4 @@
-import VerifiableAuth.LoginSpec
+import VerifiableAuth.WellFormed
 
 namespace VerifiableAuth
 
@@ -33,12 +33,31 @@ theorem changePassword_unauthorized_is_noop
 theorem user_changePassword_rotates_salt
     (user : User) (newPassword : Password) :
     (user.changePassword newPassword).salt = user.salt.rotate := by
-  simp [User.changePassword]
+  simp [User.changePassword, User.salt]
 
 theorem user_changePassword_clears_failures
     (user : User) (newPassword : Password) :
     (user.changePassword newPassword).failedAttempts = 0 ∧
       (user.changePassword newPassword).lockState = .active := by
   simp [User.changePassword]
+
+theorem changePassword_success_requires_authenticated_matching_password
+    (state : AuthState) (oldPassword newPassword : Password)
+    (hSuccess : (changePassword state oldPassword newPassword).result = .success) :
+    ∃ loginId user,
+      state.authenticated = some loginId ∧
+      state.lookupUser? loginId = some user ∧
+      user.passwordMatches oldPassword := by
+  cases hAuth : state.authenticated with
+  | none =>
+      simp [changePassword, hAuth] at hSuccess
+  | some loginId =>
+      cases hLookup : state.lookupUser? loginId with
+      | none =>
+          simp [changePassword, hAuth, hLookup] at hSuccess
+      | some user =>
+          by_cases hPassword : user.passwordMatches oldPassword
+          · exact ⟨loginId, user, rfl, hLookup, hPassword⟩
+          · simp [changePassword, hAuth, hLookup, hPassword] at hSuccess
 
 end VerifiableAuth

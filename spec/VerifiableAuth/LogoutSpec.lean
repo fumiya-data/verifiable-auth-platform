@@ -1,4 +1,4 @@
-import VerifiableAuth.ChangePasswordSpec
+import VerifiableAuth.StateModel
 
 namespace VerifiableAuth
 

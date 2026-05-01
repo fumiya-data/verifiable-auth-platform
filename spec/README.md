@@ -35,9 +35,12 @@ flowchart TD
   state --> types
   well --> state
   register --> well
-  login --> register
-  change --> login
-  logout --> change
+  login --> well
+  change --> well
+  logout --> state
+  invariants --> register
+  invariants --> login
+  invariants --> change
   invariants --> logout
   refinement --> invariants
   examples --> refinement

@@ -11,10 +11,13 @@ This document records the current alignment status between:
 The three layers are currently aligned on the following core behaviors:
 
 - State model: `users + authenticated session`
+- Lean nominal `LoginId`/`Password` wrappers refine to C string values at the engine boundary
+- Lean's nested `Credential` model refines to the C engine's flat `salt` and `password_hash` user fields
 - Operation set: `register`, `login`, `change_password`, `logout`
 - Result codes exposed by the CLI contract
 - Lockout threshold behavior and session-preservation rules
 - Password-change semantics that replace both salt and hash
+- Full Lean `CoreInvariants` preservation for all four core operations
 - Observability mapping for audit events and derived metrics
 - The rule that `already_authenticated` is recorded as `LoginFailure` but does not increment `login_failure_count`
 
@@ -43,6 +46,7 @@ The three layers are currently aligned on the following core behaviors:
 ## Verification Performed
 
 - `lake build` succeeded in `spec/`
+- `scripts/run-engine-tests.ps1` succeeded on Windows with 17/17 CTest tests passing.
 - The repository now defines a canonical engine verification path through
   [`../scripts/run-engine-tests.sh`](../scripts/run-engine-tests.sh), which
   configures a fresh CMake build, compiles the C engine, and runs CTest.
