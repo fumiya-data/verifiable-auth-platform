@@ -4,7 +4,7 @@ BUILD_DIR ?= build
 BUILD_MARKER := $(BUILD_DIR)/.dir
 RM ?= rm -rf
 EXEEXT ?=
-CPPFLAGS ?= -Iinclude -Isrc/crypto
+CPPFLAGS ?= -Iinclude -Isrc/crypto -Itests/support
 CFLAGS ?= -std=c23 -Wall -Wextra -Wpedantic -Werror
 LDLIBS ?=
 

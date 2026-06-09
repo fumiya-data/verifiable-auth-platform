@@ -80,6 +80,7 @@ storage_audit_log_status_t storage_audit_log_append(const char *path,
 {
     char timestamp[STORAGE_AUDIT_TIMESTAMP_LENGTH];
     char line[256];
+    int line_length = 0;
 
     if (path == nullptr || login_id == nullptr || result == nullptr) {
         return STORAGE_AUDIT_LOG_STATUS_INVALID_ARGUMENT;
@@ -89,13 +90,14 @@ storage_audit_log_status_t storage_audit_log_append(const char *path,
         return STORAGE_AUDIT_LOG_STATUS_IO_ERROR;
     }
 
-    if (snprintf(line,
-                 sizeof(line),
-                 "%s\t%s\t%s\t%s\n",
-                 timestamp,
-                 storage_audit_event_type_string(event_type),
-                 login_id,
-                 result) < 0) {
+    line_length = snprintf(line,
+                           sizeof(line),
+                           "%s\t%s\t%s\t%s\n",
+                           timestamp,
+                           storage_audit_event_type_string(event_type),
+                           login_id,
+                           result);
+    if (line_length < 0 || (size_t)line_length >= sizeof(line)) {
         return STORAGE_AUDIT_LOG_STATUS_IO_ERROR;
     }
 

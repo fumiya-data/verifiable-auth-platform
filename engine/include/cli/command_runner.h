@@ -29,4 +29,24 @@ int cli_command_runner_run_with_streams(int argc,
                                         FILE *output_stream,
                                         FILE *error_stream);
 
+/**
+ * @brief Execute the engine CLI against caller-supplied input/output streams.
+ *
+ * Secret values are read from @p input_stream when a command uses the
+ * `--*-stdin` secret transport flags. This entry point is intended for tests
+ * that need deterministic stdin payloads.
+ *
+ * @param argc Argument count supplied by the caller.
+ * @param argv Argument vector supplied by the caller.
+ * @param input_stream Stream used for stdin secret transport.
+ * @param output_stream Stream that receives JSON responses.
+ * @param error_stream Reserved error stream handle for future diagnostics.
+ * @return Process exit code from the CLI command runner.
+ */
+int cli_command_runner_run_with_io(int argc,
+                                   char **argv,
+                                   FILE *input_stream,
+                                   FILE *output_stream,
+                                   FILE *error_stream);
+
 #endif

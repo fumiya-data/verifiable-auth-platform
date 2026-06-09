@@ -12,6 +12,10 @@ auth_change_password_result_t auth_change_password(auth_state_t *state,
 {
     auth_user_t *user = nullptr;
 
+    if (state == nullptr || old_password == nullptr || new_password == nullptr) {
+        return AUTH_CHANGE_PASSWORD_RESULT_SYSTEM_ERROR;
+    }
+
     assert(state != nullptr);
     assert(old_password != nullptr);
     assert(new_password != nullptr);
@@ -34,14 +38,18 @@ auth_change_password_result_t auth_change_password(auth_state_t *state,
     }
 
     /* The spec requires both the salt and the hash to be replaced together. */
-    assert(auth_salt_generate(user->salt, sizeof(user->salt)) == AUTH_SALT_STATUS_OK);
+    if (auth_salt_generate(user->salt, sizeof(user->salt)) != AUTH_SALT_STATUS_OK) {
+        return AUTH_CHANGE_PASSWORD_RESULT_SYSTEM_ERROR;
+    }
 
-    assert(auth_hash_password((const uint8_t *)new_password,
-                              strlen(new_password),
-                              (const uint8_t *)user->salt,
-                              strlen(user->salt),
-                              user->password_hash,
-                              sizeof(user->password_hash)) == AUTH_HASH_STATUS_OK);
+    if (auth_hash_password((const uint8_t *)new_password,
+                           strlen(new_password),
+                           (const uint8_t *)user->salt,
+                           strlen(user->salt),
+                           user->password_hash,
+                           sizeof(user->password_hash)) != AUTH_HASH_STATUS_OK) {
+        return AUTH_CHANGE_PASSWORD_RESULT_SYSTEM_ERROR;
+    }
 
     /* A successful password change also clears lockout-related account state. */
     user->failed_attempts = 0u;

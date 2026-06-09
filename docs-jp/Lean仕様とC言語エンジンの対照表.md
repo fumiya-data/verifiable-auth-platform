@@ -81,7 +81,7 @@
 
 | Lean 仕様 | C 実装 | 対応関係の根拠 / 実装上の妥協点 |
 | --- | --- | --- |
-| `spec/VerifiableAuth/RegisterSpec.lean` の `register` 定義 | `engine/src/core/register.c` の `auth_register(...)` | 同じ 2 分岐が存在します。duplicate は state unchanged、そうでなければ fresh user が append されます。 |
+| `spec/VerifiableAuth/RegisterSpec.lean` の `register` 定義 | `engine/src/core/register.c` の `auth_register(...)` | valid fixed-capacity domain 内では、同じ 2 つの model branch が存在します。duplicate は state unchanged、そうでなければ fresh user が append されます。C 実装は invalid argument、capacity exhausted、credential generation failure に対して runtime `system_error` guard を追加します。 |
 | duplicate branch が `{ state := state, result := .duplicate }` を返す | `engine/src/core/register.c` の early duplicate return | 直接整合です。現在の命令的実装では、mutation 前に return します。 |
 | success branch が `mkRegisteredUser` を insert する | `engine/src/core/register.c` の new-user creation と append | engine は同じ論理的仕事を行いますが、salt/hash generation を具体化しなければなりません。 |
 | `spec/VerifiableAuth/RegisterSpec.lean` の `register_preserves_session` | `engine/src/core/register.c` は session field に触れず、CLI は `engine/src/cli/command_runner.c` で modified user store だけを save する | Lean は session preservation を直接証明します。C は、`auth_register(...)` に session-field write が存在しないことでそれを守ります。 |
@@ -126,7 +126,7 @@
 
 | Lean 仕様 | C 実装 | 対応関係の根拠 / 実装上の妥協点 |
 | --- | --- | --- |
-| `spec/VerifiableAuth/Types.lean` の `RegisterResult`, `LoginResult`, `ChangePasswordResult`, `LogoutResult` | `engine/include/auth/result.h` の `auth_register_result_t`, `auth_login_result_t`, `auth_change_password_result_t`, `auth_logout_result_t` | これが result space の中核的整合です。 |
+| `spec/VerifiableAuth/Types.lean` の `RegisterResult`, `LoginResult`, `ChangePasswordResult`, `LogoutResult` | `engine/include/auth/result.h` の `auth_register_result_t`, `auth_login_result_t`, `auth_change_password_result_t`, `auth_logout_result_t` | これが result space の中核的整合です。`RegisterResult.systemError` は valid model 内の第 3 の pure register branch ではなく、implementation bound に対する refinement-level outcome です。 |
 | `spec/VerifiableAuth/RefinementNotes.lean` の `*.cliCode` | `engine/src/cli/command_runner.c` の `cli_register_result_string(...)`, `cli_login_result_string(...)`, `cli_change_password_result_string(...)` | string code は CLI boundary で意図的に固定されています。TUI や将来の tooling は C enum ではなくこの string code に依存するため、ここは最重要 refinement point の一つです。 |
 | `spec/VerifiableAuth/RefinementNotes.lean` の `*.isOk` | `engine/src/cli/command_runner.c` で `cli_json_write_*` helper へ渡される `ok` boolean | 直接的な挙動整合です。engine は domain-level failure と runtime failure の区別を保持します。 |
 | `docs/system-specification.md` における `ok`, `result`, `data`, `error` を含む CLI contract requirement | `engine/src/cli/json_output.c` の `cli_json_write_response_begin(...)`, `cli_json_write_response_end(...)`, `cli_json_write_null_response(...)` | Lean は JSON syntax そのものをモデル化しません。散文仕様と refinement note が、pure state machine と concrete engine contract の橋渡しをしています。JSON は core proof の本質ではなく implementation boundary に属するため、この分離は妥当です。 |
@@ -238,6 +238,7 @@ proof-oriented model よりも現実の engine が具体的にならざるを得
 
 - user membership と single-session authentication の意味モデルは同じ
 - capacity limit は supported range 内の implementation bound であり、操作の意味そのものを変えない
+- supported range の外では、C engine は assertion に依存したり fixed array の外へ書き込んだりせず、`system_error` を返す
 
 ### 4. 形式的な well-formedness predicate と runtime parse rejection
 

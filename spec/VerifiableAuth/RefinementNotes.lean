@@ -5,10 +5,12 @@ namespace VerifiableAuth
 def RegisterResult.cliCode : RegisterResult → String
   | .success => "success"
   | .duplicate => "duplicate"
+  | .systemError => "system_error"
 
 def RegisterResult.isOk : RegisterResult → Bool
   | .success => true
   | .duplicate => false
+  | .systemError => false
 
 def LoginResult.cliCode : LoginResult → String
   | .success => "success"

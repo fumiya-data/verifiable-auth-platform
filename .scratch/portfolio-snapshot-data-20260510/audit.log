@@ -1,0 +1,6 @@
+2026-05-10T04:10:04Z	Register	alice	success
+2026-05-10T04:10:05Z	LoginSuccess	alice	success
+2026-05-10T04:10:05Z	Logout	alice	success
+2026-05-10T04:10:06Z	LoginFailure	alice	wrong_password
+2026-05-10T04:10:07Z	LoginFailure	alice	wrong_password
+2026-05-10T04:10:08Z	Lock	alice	locked_out

@@ -24,3 +24,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ninja-build clang cmake
       - name: Run engine tests
         run: bash scripts/run-engine-tests.sh
+      - name: Run engine tests in Release mode
+        run: |
+          cmake -S engine -B engine/.build-release -DCMAKE_BUILD_TYPE=Release
+          cmake --build engine/.build-release
+          ctest --test-dir engine/.build-release --output-on-failure

@@ -101,6 +101,7 @@ structure AuthState where
 inductive RegisterResult
   | success
   | duplicate
+  | systemError
   deriving DecidableEq, Repr, BEq, Inhabited
 
 inductive LoginResult

@@ -37,15 +37,24 @@ engine は 1 つの位置引数 command と、次の option を受け取りま�
   - 任意。既定値は `.engine-data`
 - `--login-id <value>`
   - `register` と `login` に必須
-- `--password <value>`
-  - `register` と `login` に必須
-- `--old-password <value>`
-  - `change-password` に必須
-- `--new-password <value>`
-  - `change-password` に必須
+- `--password-stdin`
+  - `register` と `login` に必須。stdin から password を 1 行読み取る
+- `--old-password-stdin`
+  - `change-password` に必須。stdin から最初の password 行を読み取る
+- `--new-password-stdin`
+  - `change-password` に必須。stdin から次の password 行を読み取る
 
 未知の option、option value の欠落、必須引数の欠落、未知 command 名は
 `invalid_request` JSON 応答と usage error exit code を返します。
+
+plaintext password value は argv では受け付けません。
+`--password`、`--old-password`、`--new-password` を使った request は
+`invalid_request` として拒否されます。stdin の password transport は行単位で、
+行末は transport delimiter であり password value には含まれません。
+
+login ID と password は空ではなく、engine が設定した長さ上限以内で、control
+character を含んではいけません。login ID は `users.tsv`、`session.txt`、
+`audit.log` に保存されるため、TSV delimiter も含んではいけません。
 
 ## `--data-dir` 配下の永続化ファイル
 
@@ -116,7 +125,7 @@ engine は [`engine/include/cli/exit_codes.h`](../engine/include/cli/exit_codes.
 必須 option:
 
 - `--login-id`
-- `--password`
+- `--password-stdin`
 
 安定した `result` code:
 
@@ -143,7 +152,7 @@ engine は [`engine/include/cli/exit_codes.h`](../engine/include/cli/exit_codes.
 必須 option:
 
 - `--login-id`
-- `--password`
+- `--password-stdin`
 
 安定した `result` code:
 
@@ -169,8 +178,8 @@ engine は [`engine/include/cli/exit_codes.h`](../engine/include/cli/exit_codes.
 
 必須 option:
 
-- `--old-password`
-- `--new-password`
+- `--old-password-stdin`
+- `--new-password-stdin`
 
 安定した `result` code:
 
@@ -304,6 +313,7 @@ Runtime failure は:
 
 - command 名
 - 安定した option 名
+- password value の stdin secret transport
 - JSON field 名
 - 安定した `result` code
 - exit-code policy

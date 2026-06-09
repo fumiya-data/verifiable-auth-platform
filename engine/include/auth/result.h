@@ -9,6 +9,8 @@ typedef enum auth_register_result {
     AUTH_REGISTER_RESULT_SUCCESS = 0,
     /** A user with the same login ID already exists. */
     AUTH_REGISTER_RESULT_DUPLICATE,
+    /** The register request could not be completed safely at runtime. */
+    AUTH_REGISTER_RESULT_SYSTEM_ERROR,
 } auth_register_result_t;
 
 /**

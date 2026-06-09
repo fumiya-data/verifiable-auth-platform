@@ -38,16 +38,26 @@ The engine accepts one positional command name and these options:
   - Optional. Defaults to `.engine-data`.
 - `--login-id <value>`
   - Required for `register` and `login`.
-- `--password <value>`
-  - Required for `register` and `login`.
-- `--old-password <value>`
-  - Required for `change-password`.
-- `--new-password <value>`
-  - Required for `change-password`.
+- `--password-stdin`
+  - Required for `register` and `login`. Reads one password line from stdin.
+- `--old-password-stdin`
+  - Required for `change-password`. Reads the first password line from stdin.
+- `--new-password-stdin`
+  - Required for `change-password`. Reads the next password line from stdin.
 
 Unknown options, missing option values, missing required command arguments, or
 an unknown command name produce an `invalid_request` JSON response and a usage
 error exit code.
+
+Plaintext password values are not accepted through argv. Requests using
+`--password`, `--old-password`, or `--new-password` are rejected as
+`invalid_request`. Stdin password transport is line based; the line ending is a
+transport delimiter and is not part of the password value.
+
+Login IDs and passwords must be non-empty, within the engine's configured
+length bounds, and free of control characters. Login IDs also must not contain
+TSV delimiters because they are stored in `users.tsv`, `session.txt`, and
+`audit.log`.
 
 ## Persisted Files Behind `--data-dir`
 
@@ -123,7 +133,7 @@ This policy lets clients distinguish:
 Required options:
 
 - `--login-id`
-- `--password`
+- `--password-stdin`
 
 Stable `result` codes:
 
@@ -150,7 +160,7 @@ Reference golden outputs:
 Required options:
 
 - `--login-id`
-- `--password`
+- `--password-stdin`
 
 Stable `result` codes:
 
@@ -176,8 +186,8 @@ Reference golden outputs:
 
 Required options:
 
-- `--old-password`
-- `--new-password`
+- `--old-password-stdin`
+- `--new-password-stdin`
 
 Stable `result` codes:
 
@@ -312,6 +322,7 @@ Those consumers should rely on:
 
 - command names,
 - stable option names,
+- stdin secret transport for password values,
 - JSON field names,
 - stable `result` codes, and
 - exit-code policy.

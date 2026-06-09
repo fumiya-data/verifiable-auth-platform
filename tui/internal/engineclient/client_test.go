@@ -3,7 +3,10 @@ package engineclient
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"github.com/fumiya-data/verifiable-auth-platform/tui/internal/types"
 )
 
 func TestResolveConfigPrefersFlagsOverEnvironment(t *testing.T) {
@@ -76,5 +79,31 @@ func TestFindDefaultEnginePathPrefersDotBuildCandidate(t *testing.T) {
 	expectedPath, _ := filepath.Abs(enginePath)
 	if resolved != expectedPath {
 		t.Fatalf("expected %q, got %q", expectedPath, resolved)
+	}
+}
+
+func TestPasswordCommandsUseStdinSecretTransport(t *testing.T) {
+	config := types.AppConfig{DataDir: "data-dir"}
+	args := buildCommandArgs(
+		config,
+		"change-password",
+		"--old-password-stdin",
+		"--new-password-stdin",
+	)
+	input := passwordInput("old-secret", "new-secret")
+
+	for _, arg := range args {
+		if strings.Contains(arg, "secret") {
+			t.Fatalf("secret value leaked into argv: %q", args)
+		}
+	}
+
+	if strings.Contains(strings.Join(args, "\x00"), "--old-password\x00old-secret") ||
+		strings.Contains(strings.Join(args, "\x00"), "--new-password\x00new-secret") {
+		t.Fatalf("password value should not be passed through argv: %q", args)
+	}
+
+	if input != "old-secret\nnew-secret\n" {
+		t.Fatalf("unexpected stdin password payload: %q", input)
 	}
 }

@@ -1,4 +1,6 @@
-# Verifiable Auth Platform
+[日本語](./README-日本語.md) | [English](./README.md)
+
+# パスワード認証検証基盤
 
 この文書は [`README.md`](./README.md) の日本語版です。
 
@@ -32,6 +34,8 @@ Verifiable Auth Platform は、仕様、実装、テスト、観測可能性の�
 - [エンジン CLI 契約](./docs-jp/エンジン用CLI.md)
 - [Go TUI 運用 Runbook](./docs-jp/Go-TUI運用Runbook.md)
 - [認証状態機械](./docs-jp/認証状態機械.md)
+- [コードレビュー 2026-05-03](./docs-jp/code-review-2026-05-03-ja.md)
+- [コードレビュー修復記録 2026-05-03](./docs-jp/code-review-2026-05-03-remediation-ja.md)
 
 ## アーキテクチャ決定記録
 

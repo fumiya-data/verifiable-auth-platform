@@ -119,6 +119,7 @@ users <- insert(user)
 
 - `success`
 - `duplicate`
+- `system_error` for implementation-bound failures outside the valid fixed-capacity domain
 
 #### Properties
 
@@ -281,6 +282,7 @@ Metric:
 
 - `register -> success` records `event_type = Register`, `result = success`, and does not change login metrics.
 - `register -> duplicate` records `event_type = Register`, `result = duplicate`, and does not change login metrics.
+- `register -> system_error` records `event_type = Register`, `result = system_error`, and does not change login metrics.
 - `login -> success` records `event_type = LoginSuccess`, `result = success`, and increments `login_success_count`.
 - `login -> wrong_password` records `event_type = LoginFailure`, `result = wrong_password`, and increments `login_failure_count`.
 - `login -> unknown_user` records `event_type = LoginFailure`, `result = unknown_user`, and increments `login_failure_count`.
@@ -330,6 +332,7 @@ The CLI contract consists of:
 - stable command names
 - stable JSON response field names
 - stable result codes
+- stdin-based password transport rather than plaintext password argv values
 - deterministic serialization for equivalent results
 
 Every command response must include:

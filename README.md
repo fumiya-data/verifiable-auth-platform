@@ -1,3 +1,5 @@
+[日本語](./README-日本語.md) | [English](./README.md)
+
 # Verifiable Auth Platform
 
 Verifiable Auth Platform is a local authentication foundation centered on verifiability across specification, implementation, testing, and observability.
@@ -34,6 +36,8 @@ changing as the project is developed.
 - [Engine CLI Contract](./docs/engine-cli-contract.md)
 - [Go TUI Runbook](./docs/go-tui-runbook.md)
 - [Authentication State Machine](./docs/state-machine.md)
+- [Code Review 2026-05-03](./docs/code-review-2026-05-03-en.md)
+- [Code Review Remediation 2026-05-03](./docs/code-review-2026-05-03-remediation.md)
 
 ## Architecture Decision Records
 

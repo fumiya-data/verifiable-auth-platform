@@ -1,4 +1,4 @@
-#include <assert.h>
+#include "test_support.h"
 #include <string.h>
 
 #include "auth/validation.h"
@@ -11,10 +11,10 @@ static void test_login_id_validation(void)
     memset(too_long, 'a', sizeof(too_long) - 1u);
     too_long[sizeof(too_long) - 1u] = '\0';
 
-    assert(auth_validate_login_id(nullptr) == AUTH_VALIDATION_RESULT_NULL);
-    assert(auth_validate_login_id("") == AUTH_VALIDATION_RESULT_EMPTY);
-    assert(auth_validate_login_id("alice") == AUTH_VALIDATION_RESULT_OK);
-    assert(auth_validate_login_id(too_long) == AUTH_VALIDATION_RESULT_TOO_LONG);
+    TEST_CHECK(auth_validate_login_id(nullptr) == AUTH_VALIDATION_RESULT_NULL);
+    TEST_CHECK(auth_validate_login_id("") == AUTH_VALIDATION_RESULT_EMPTY);
+    TEST_CHECK(auth_validate_login_id("alice") == AUTH_VALIDATION_RESULT_OK);
+    TEST_CHECK(auth_validate_login_id(too_long) == AUTH_VALIDATION_RESULT_TOO_LONG);
 }
 
 static void test_password_validation(void)
@@ -24,10 +24,10 @@ static void test_password_validation(void)
     memset(too_long, 'p', sizeof(too_long) - 1u);
     too_long[sizeof(too_long) - 1u] = '\0';
 
-    assert(auth_validate_password(nullptr) == AUTH_VALIDATION_RESULT_NULL);
-    assert(auth_validate_password("") == AUTH_VALIDATION_RESULT_EMPTY);
-    assert(auth_validate_password("correct horse battery staple") == AUTH_VALIDATION_RESULT_OK);
-    assert(auth_validate_password(too_long) == AUTH_VALIDATION_RESULT_TOO_LONG);
+    TEST_CHECK(auth_validate_password(nullptr) == AUTH_VALIDATION_RESULT_NULL);
+    TEST_CHECK(auth_validate_password("") == AUTH_VALIDATION_RESULT_EMPTY);
+    TEST_CHECK(auth_validate_password("correct horse battery staple") == AUTH_VALIDATION_RESULT_OK);
+    TEST_CHECK(auth_validate_password(too_long) == AUTH_VALIDATION_RESULT_TOO_LONG);
 }
 
 int main(void)

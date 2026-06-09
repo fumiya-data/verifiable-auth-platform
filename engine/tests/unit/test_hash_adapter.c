@@ -1,4 +1,4 @@
-#include <assert.h>
+#include "test_support.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -14,14 +14,14 @@ static void expect_hash(const char *password,
 {
     char actual_hash[AUTH_HASH_ENCODED_LENGTH];
 
-    assert(auth_hash_password_with_iterations((const uint8_t *)password,
+    TEST_CHECK(auth_hash_password_with_iterations((const uint8_t *)password,
                                               strlen(password),
                                               (const uint8_t *)salt,
                                               strlen(salt),
                                               iterations,
                                               actual_hash,
                                               sizeof(actual_hash)) == AUTH_HASH_STATUS_OK);
-    assert(strcmp(actual_hash, expected_hash) == 0);
+    TEST_CHECK(strcmp(actual_hash, expected_hash) == 0);
 }
 
 static void test_known_vectors(void)
@@ -38,10 +38,10 @@ static void test_default_hash_matches_expected_iteration_policy(void)
 {
     char actual_hash[AUTH_HASH_ENCODED_LENGTH];
 
-    assert(auth_hash_password((const uint8_t *)"hunter2", strlen("hunter2"),
+    TEST_CHECK(auth_hash_password((const uint8_t *)"hunter2", strlen("hunter2"),
                               (const uint8_t *)"unique-salt", strlen("unique-salt"),
                               actual_hash, sizeof(actual_hash)) == AUTH_HASH_STATUS_OK);
-    assert(strcmp(actual_hash,
+    TEST_CHECK(strcmp(actual_hash,
                   "e4f9aee85089bd0018081357a186f122a11c34264d33d3504e272a3ed9cf7a36") == 0);
 }
 
@@ -50,16 +50,16 @@ static void test_verify_password(void)
     const char *expected_hash =
         "e4f9aee85089bd0018081357a186f122a11c34264d33d3504e272a3ed9cf7a36";
 
-    assert(auth_hash_verify_password((const uint8_t *)"hunter2", strlen("hunter2"),
+    TEST_CHECK(auth_hash_verify_password((const uint8_t *)"hunter2", strlen("hunter2"),
                                      (const uint8_t *)"unique-salt", strlen("unique-salt"),
                                      expected_hash));
-    assert(!auth_hash_verify_password((const uint8_t *)"wrong-password", strlen("wrong-password"),
+    TEST_CHECK(!auth_hash_verify_password((const uint8_t *)"wrong-password", strlen("wrong-password"),
                                       (const uint8_t *)"unique-salt", strlen("unique-salt"),
                                       expected_hash));
-    assert(!auth_hash_verify_password((const uint8_t *)"hunter2", strlen("hunter2"),
+    TEST_CHECK(!auth_hash_verify_password((const uint8_t *)"hunter2", strlen("hunter2"),
                                       (const uint8_t *)"other-salt", strlen("other-salt"),
                                       expected_hash));
-    assert(!auth_hash_verify_password((const uint8_t *)"hunter2", strlen("hunter2"),
+    TEST_CHECK(!auth_hash_verify_password((const uint8_t *)"hunter2", strlen("hunter2"),
                                       (const uint8_t *)"unique-salt", strlen("unique-salt"),
                                       "short"));
 }
@@ -68,27 +68,27 @@ static void test_invalid_arguments(void)
 {
     char actual_hash[AUTH_HASH_ENCODED_LENGTH];
 
-    assert(auth_hash_password_with_iterations(nullptr, 1u,
+    TEST_CHECK(auth_hash_password_with_iterations(nullptr, 1u,
                                               (const uint8_t *)"salt", strlen("salt"),
                                               1u,
                                               actual_hash,
                                               sizeof(actual_hash)) == AUTH_HASH_STATUS_INVALID_ARGUMENT);
-    assert(auth_hash_password_with_iterations((const uint8_t *)"password", strlen("password"),
+    TEST_CHECK(auth_hash_password_with_iterations((const uint8_t *)"password", strlen("password"),
                                               nullptr, 1u,
                                               1u,
                                               actual_hash,
                                               sizeof(actual_hash)) == AUTH_HASH_STATUS_INVALID_ARGUMENT);
-    assert(auth_hash_password_with_iterations((const uint8_t *)"password", strlen("password"),
+    TEST_CHECK(auth_hash_password_with_iterations((const uint8_t *)"password", strlen("password"),
                                               (const uint8_t *)"salt", strlen("salt"),
                                               0u,
                                               actual_hash,
                                               sizeof(actual_hash)) == AUTH_HASH_STATUS_INVALID_ARGUMENT);
-    assert(auth_hash_password((const uint8_t *)"password", strlen("password"),
+    TEST_CHECK(auth_hash_password((const uint8_t *)"password", strlen("password"),
                               (const uint8_t *)"salt", strlen("salt"),
                               actual_hash,
                               AUTH_HASH_ENCODED_LENGTH - 1u) == AUTH_HASH_STATUS_OUTPUT_TOO_SMALL);
-    assert(strcmp(auth_hash_status_string(AUTH_HASH_STATUS_OK), "ok") == 0);
-    assert(strcmp(auth_hash_status_string(AUTH_HASH_STATUS_INVALID_ARGUMENT),
+    TEST_CHECK(strcmp(auth_hash_status_string(AUTH_HASH_STATUS_OK), "ok") == 0);
+    TEST_CHECK(strcmp(auth_hash_status_string(AUTH_HASH_STATUS_INVALID_ARGUMENT),
                   "invalid_argument") == 0);
 }
 

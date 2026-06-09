@@ -9,6 +9,7 @@
 #include "auth/logout.h"
 #include "auth/register.h"
 #include "auth/state.h"
+#include "auth/validation.h"
 #include "cli/exit_codes.h"
 #include "cli/json_output.h"
 #include "storage/audit_log.h"
@@ -25,6 +26,9 @@ typedef struct cli_command_args {
     const char *password;
     const char *old_password;
     const char *new_password;
+    bool password_from_stdin;
+    bool old_password_from_stdin;
+    bool new_password_from_stdin;
 } cli_command_args_t;
 
 typedef struct cli_command_paths {
@@ -32,6 +36,12 @@ typedef struct cli_command_paths {
     char session_path[CLI_PATH_BUFFER_LENGTH];
     char audit_path[CLI_PATH_BUFFER_LENGTH];
 } cli_command_paths_t;
+
+typedef struct cli_secret_buffers {
+    char password[AUTH_PASSWORD_MAX_LENGTH + 2u];
+    char old_password[AUTH_PASSWORD_MAX_LENGTH + 2u];
+    char new_password[AUTH_PASSWORD_MAX_LENGTH + 2u];
+} cli_secret_buffers_t;
 
 static bool cli_string_equals(const char *left, const char *right)
 {
@@ -50,21 +60,33 @@ static bool cli_parse_arguments(int argc,
         const char *argument = argv[index];
 
         if (strncmp(argument, "--", 2u) == 0) {
-            if (index + 1 >= argc) {
-                *error_message = "missing option value";
-                return false;
-            }
-
             if (cli_string_equals(argument, "--data-dir")) {
+                if (index + 1 >= argc) {
+                    *error_message = "missing option value";
+                    return false;
+                }
                 args->data_dir = argv[++index];
             } else if (cli_string_equals(argument, "--login-id")) {
+                if (index + 1 >= argc) {
+                    *error_message = "missing option value";
+                    return false;
+                }
                 args->login_id = argv[++index];
             } else if (cli_string_equals(argument, "--password")) {
-                args->password = argv[++index];
+                *error_message = "password argv transport is not supported; use --password-stdin";
+                return false;
             } else if (cli_string_equals(argument, "--old-password")) {
-                args->old_password = argv[++index];
+                *error_message = "password argv transport is not supported; use --old-password-stdin";
+                return false;
             } else if (cli_string_equals(argument, "--new-password")) {
-                args->new_password = argv[++index];
+                *error_message = "password argv transport is not supported; use --new-password-stdin";
+                return false;
+            } else if (cli_string_equals(argument, "--password-stdin")) {
+                args->password_from_stdin = true;
+            } else if (cli_string_equals(argument, "--old-password-stdin")) {
+                args->old_password_from_stdin = true;
+            } else if (cli_string_equals(argument, "--new-password-stdin")) {
+                args->new_password_from_stdin = true;
             } else {
                 *error_message = "unknown option";
                 return false;
@@ -102,6 +124,76 @@ static bool cli_build_paths(const cli_command_args_t *args, cli_command_paths_t 
 static bool cli_ensure_required(const char *value)
 {
     return value != nullptr;
+}
+
+static bool cli_string_has_control_or_delimiter(const char *value)
+{
+    for (size_t index = 0u; value[index] != '\0'; ++index) {
+        const unsigned char ch = (unsigned char)value[index];
+
+        if (ch < 0x20u || ch == 0x7fu || ch == '\t') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool cli_validate_login_id(const char *login_id)
+{
+    return auth_validate_login_id(login_id) == AUTH_VALIDATION_RESULT_OK &&
+           !cli_string_has_control_or_delimiter(login_id);
+}
+
+static bool cli_validate_password(const char *password)
+{
+    return auth_validate_password(password) == AUTH_VALIDATION_RESULT_OK &&
+           !cli_string_has_control_or_delimiter(password);
+}
+
+static bool cli_read_secret_line(FILE *input_stream, char *buffer, size_t buffer_size)
+{
+    size_t length = 0u;
+    bool has_line_ending = false;
+
+    if (input_stream == nullptr || buffer == nullptr || buffer_size == 0u) {
+        return false;
+    }
+
+    if (fgets(buffer, (int)buffer_size, input_stream) == nullptr) {
+        return false;
+    }
+
+    length = strlen(buffer);
+    has_line_ending = length > 0u && buffer[length - 1u] == '\n';
+    if (!has_line_ending && length == buffer_size - 1u) {
+        return false;
+    }
+
+    while (length > 0u && (buffer[length - 1u] == '\n' || buffer[length - 1u] == '\r')) {
+        buffer[length - 1u] = '\0';
+        --length;
+    }
+
+    return true;
+}
+
+static bool cli_load_stdin_secret(FILE *input_stream,
+                                  bool from_stdin,
+                                  const char **target,
+                                  char *buffer,
+                                  size_t buffer_size)
+{
+    if (!from_stdin) {
+        return false;
+    }
+
+    if (!cli_read_secret_line(input_stream, buffer, buffer_size)) {
+        return false;
+    }
+
+    *target = buffer;
+    return true;
 }
 
 static bool cli_ensure_data_dir(const cli_command_args_t *args)
@@ -223,13 +315,15 @@ static void cli_write_show_metrics(FILE *output_stream, const storage_metrics_t 
     cli_json_write_response_end(output_stream, nullptr);
 }
 
-int cli_command_runner_run_with_streams(int argc,
-                                        char **argv,
-                                        FILE *output_stream,
-                                        FILE *error_stream)
+int cli_command_runner_run_with_io(int argc,
+                                   char **argv,
+                                   FILE *input_stream,
+                                   FILE *output_stream,
+                                   FILE *error_stream)
 {
     cli_command_args_t args;
     cli_command_paths_t paths;
+    cli_secret_buffers_t secrets;
     auth_state_t state;
     const char *error_message = nullptr;
 
@@ -239,6 +333,8 @@ int cli_command_runner_run_with_streams(int argc,
         cli_json_write_null_response(output_stream, false, "invalid_request", error_message);
         return CLI_EXIT_CODE_USAGE_ERROR;
     }
+
+    memset(&secrets, 0, sizeof(secrets));
 
     if (!cli_build_paths(&args, &paths)) {
         cli_json_write_null_response(output_stream, false, "system_error", "path construction failed");
@@ -288,8 +384,22 @@ int cli_command_runner_run_with_streams(int argc,
         const char *result_string = nullptr;
         bool ok = false;
 
+        if (!cli_load_stdin_secret(input_stream,
+                                   args.password_from_stdin,
+                                   &args.password,
+                                   secrets.password,
+                                   sizeof(secrets.password))) {
+            cli_json_write_null_response(output_stream, false, "invalid_request", "missing stdin password");
+            return CLI_EXIT_CODE_USAGE_ERROR;
+        }
+
         if (!cli_ensure_required(args.login_id) || !cli_ensure_required(args.password)) {
             cli_json_write_null_response(output_stream, false, "invalid_request", "missing register arguments");
+            return CLI_EXIT_CODE_USAGE_ERROR;
+        }
+
+        if (!cli_validate_login_id(args.login_id) || !cli_validate_password(args.password)) {
+            cli_json_write_null_response(output_stream, false, "invalid_request", "invalid register arguments");
             return CLI_EXIT_CODE_USAGE_ERROR;
         }
 
@@ -320,8 +430,22 @@ int cli_command_runner_run_with_streams(int argc,
     }
 
     if (cli_string_equals(args.command, "login")) {
+        if (!cli_load_stdin_secret(input_stream,
+                                   args.password_from_stdin,
+                                   &args.password,
+                                   secrets.password,
+                                   sizeof(secrets.password))) {
+            cli_json_write_null_response(output_stream, false, "invalid_request", "missing stdin password");
+            return CLI_EXIT_CODE_USAGE_ERROR;
+        }
+
         if (!cli_ensure_required(args.login_id) || !cli_ensure_required(args.password)) {
             cli_json_write_null_response(output_stream, false, "invalid_request", "missing login arguments");
+            return CLI_EXIT_CODE_USAGE_ERROR;
+        }
+
+        if (!cli_validate_login_id(args.login_id) || !cli_validate_password(args.password)) {
+            cli_json_write_null_response(output_stream, false, "invalid_request", "invalid login arguments");
             return CLI_EXIT_CODE_USAGE_ERROR;
         }
 
@@ -355,8 +479,27 @@ int cli_command_runner_run_with_streams(int argc,
     }
 
     if (cli_string_equals(args.command, "change-password")) {
+        if (!cli_load_stdin_secret(input_stream,
+                                   args.old_password_from_stdin,
+                                   &args.old_password,
+                                   secrets.old_password,
+                                   sizeof(secrets.old_password)) ||
+            !cli_load_stdin_secret(input_stream,
+                                   args.new_password_from_stdin,
+                                   &args.new_password,
+                                   secrets.new_password,
+                                   sizeof(secrets.new_password))) {
+            cli_json_write_null_response(output_stream, false, "invalid_request", "missing stdin password");
+            return CLI_EXIT_CODE_USAGE_ERROR;
+        }
+
         if (!cli_ensure_required(args.old_password) || !cli_ensure_required(args.new_password)) {
             cli_json_write_null_response(output_stream, false, "invalid_request", "missing password arguments");
+            return CLI_EXIT_CODE_USAGE_ERROR;
+        }
+
+        if (!cli_validate_password(args.old_password) || !cli_validate_password(args.new_password)) {
+            cli_json_write_null_response(output_stream, false, "invalid_request", "invalid password arguments");
             return CLI_EXIT_CODE_USAGE_ERROR;
         }
 
@@ -418,7 +561,15 @@ int cli_command_runner_run_with_streams(int argc,
     return CLI_EXIT_CODE_USAGE_ERROR;
 }
 
+int cli_command_runner_run_with_streams(int argc,
+                                        char **argv,
+                                        FILE *output_stream,
+                                        FILE *error_stream)
+{
+    return cli_command_runner_run_with_io(argc, argv, stdin, output_stream, error_stream);
+}
+
 int cli_command_runner_run(int argc, char **argv)
 {
-    return cli_command_runner_run_with_streams(argc, argv, stdout, stderr);
+    return cli_command_runner_run_with_io(argc, argv, stdin, stdout, stderr);
 }

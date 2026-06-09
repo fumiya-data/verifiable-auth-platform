@@ -97,21 +97,39 @@ func ResolveConfig(enginePathValue string, dataDirValue string) (types.AppConfig
  * Register invokes the engine register command.
  */
 func (c *Client) Register(loginID string, password string) (CommandResult[EmptyData], error) {
-	return executeRequest[EmptyData](c, "register", "--login-id", loginID, "--password", password)
+	return executeRequestWithInput[EmptyData](
+		c,
+		"register",
+		passwordInput(password),
+		"--login-id", loginID,
+		"--password-stdin",
+	)
 }
 
 /**
  * Login invokes the engine login command.
  */
 func (c *Client) Login(loginID string, password string) (CommandResult[EmptyData], error) {
-	return executeRequest[EmptyData](c, "login", "--login-id", loginID, "--password", password)
+	return executeRequestWithInput[EmptyData](
+		c,
+		"login",
+		passwordInput(password),
+		"--login-id", loginID,
+		"--password-stdin",
+	)
 }
 
 /**
  * ChangePassword invokes the engine change-password command.
  */
 func (c *Client) ChangePassword(oldPassword string, newPassword string) (CommandResult[EmptyData], error) {
-	return executeRequest[EmptyData](c, "change-password", "--old-password", oldPassword, "--new-password", newPassword)
+	return executeRequestWithInput[EmptyData](
+		c,
+		"change-password",
+		passwordInput(oldPassword, newPassword),
+		"--old-password-stdin",
+		"--new-password-stdin",
+	)
 }
 
 /**
@@ -136,14 +154,16 @@ func (c *Client) ShowMetrics() (CommandResult[MetricsData], error) {
 }
 
 func executeRequest[T any](client *Client, command string, args ...string) (CommandResult[T], error) {
-	commandArgs := []string{command}
-	if client.config.DataDir != "" {
-		commandArgs = append(commandArgs, "--data-dir", client.config.DataDir)
-	}
+	return executeRequestWithInput[T](client, command, "", args...)
+}
 
-	commandArgs = append(commandArgs, args...)
-
-	processResult, err := runCommand(client.config.EnginePath, commandArgs...)
+func executeRequestWithInput[T any](client *Client,
+	command string,
+	input string,
+	args ...string,
+) (CommandResult[T], error) {
+	commandArgs := buildCommandArgs(client.config, command, args...)
+	processResult, err := runCommandWithInput(client.config.EnginePath, input, commandArgs...)
 	if err != nil {
 		return CommandResult[T]{}, err
 	}
@@ -158,6 +178,26 @@ func executeRequest[T any](client *Client, command string, args ...string) (Comm
 		ExitCode: processResult.exitCode,
 		Stderr:   processResult.stderr,
 	}, nil
+}
+
+func buildCommandArgs(config types.AppConfig, command string, args ...string) []string {
+	commandArgs := []string{command}
+	if config.DataDir != "" {
+		commandArgs = append(commandArgs, "--data-dir", config.DataDir)
+	}
+
+	commandArgs = append(commandArgs, args...)
+	return commandArgs
+}
+
+func passwordInput(passwords ...string) string {
+	input := ""
+
+	for _, password := range passwords {
+		input += password + "\n"
+	}
+
+	return input
 }
 
 func firstNonEmpty(values ...string) string {

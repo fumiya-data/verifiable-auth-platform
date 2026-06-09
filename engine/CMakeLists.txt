@@ -25,6 +25,8 @@ function(engine_add_test test_name)
     )
 endfunction()
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tests/support)
+
 add_library(engine_crypto STATIC
     src/crypto/hash_adapter.c
     src/crypto/salt_adapter.c
