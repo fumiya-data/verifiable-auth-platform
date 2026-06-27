@@ -28,6 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          use-mathlib-cache: false
+          lake-package-directory: spec
       - uses: actions/setup-go@v5
         with:
           go-version-file: tui/go.mod
